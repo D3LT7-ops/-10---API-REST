@@ -1,15 +1,17 @@
 .navbar {
-    background: rgba(255, 255, 255, 0.95);
+    padding: auto;
+    background: rgba(22, 204, 228, 0.95);
     backdrop-filter: blur(10px);
     padding: 1rem 0;
     position: fixed;
     top: 0;
     width: 100%;
     z-index: 1000;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 20px rgba(1, 118, 148, 0.1);
     text-align: center;
 }
 .footer {
+    padding: auto;
     background: #2d3436;
     color: white;
     text-align: center;
