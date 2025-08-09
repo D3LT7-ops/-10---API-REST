@@ -7,7 +7,7 @@ const API_CONFIG = {
 };
 
 
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 // ===========================================
 // ESTADO GLOBAL DA APLICAÇÃO
@@ -1022,11 +1022,8 @@ if (typeof window !== 'undefined') {
 console.log('Weather Monitor carregado com sucesso!');
 console.log('Modo demonstração:', DEMO_MODE ? 'ATIVO' : 'INATIVO');
 
-if (DEMO_MODE) {
-    console.log('💡 Para usar dados reais:');
-    console.log('1. Obtenha uma API key gratuita em: https://weatherstack.com/');
-    console.log('2. Substitua SUA_API_KEY_AQUI pela sua chave real');
-    console.log('3. Mude DEMO_MODE para false');
+if (DEMO_MODE) { 
+    console.log('99a15dbcafb7db271f431e7751086382');
 }
 
 // Adicionar event listener para detectar mudanças online/offline
