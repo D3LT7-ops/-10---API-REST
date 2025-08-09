@@ -8,6 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -15,74 +16,415 @@
                 <span>Weather Monitor</span>
             </div>
             <ul class="nav-menu">
-                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Home</a></li>
-                
+                <li><a href="#home" class="nav-link active" data-section="home">
+                    <i class="fas fa-home"></i> Clima Atual
+                </a></li>
+                <li><a href="#forecast" class="nav-link" data-section="forecast">
+                    <i class="fas fa-chart-line"></i> Previsão 7 Dias
+                </a></li>
+                <li><a href="#history" class="nav-link" data-section="history">
+                    <i class="fas fa-history"></i> Histórico
+                </a></li>
             </ul>
         </div>
     </nav>
 
-
-<h1>
-    oi
-    oi
-    oi
-</h1>
-
-<h1>
-    oi
-    oi
-    oi
-</h1>
-
-<h1>
-    oi
-    oi
-    oi
-</h1>
-
-
-<h1>
-    oi
-    oi
-    oi
-</h1>
-
-
-
-<h1>
-    oi
-    oi
-    oi
-</h1>
-
-
-
-
-<h1>
-    oi
-    oi
-    oi
-</h1>
-
-
-
-<h1>
-    oi
-    oi
-    oi
-</h1>
-
-
-
-<!--RODAPE-->
-<footer class="footer">
-        <div class="container">
-            <p>&copy; 2025 Weather Monitor. Dados fornecidos pela APILAYER WEATHERSTACK API. D3LT7-ops
-            </p>
+    <!-- HOME SECTION - Clima Atual -->
+    <section id="home" class="section active">
+        <!-- Hero Section with Search -->
+        <div class="hero">
+            <div class="hero-content">
+                <h1><i class="fas fa-cloud-rain"></i> Weather Monitor</h1>
+                <p>Sistema completo de monitoramento climático e precipitação</p>
+                
+                <!-- Search Form -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="city-input" placeholder="Digite o nome da cidade..." value="São Paulo">
+                        <button id="search-btn" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Buscar
+                        </button>
+                    </div>
+                    <div class="quick-cities">
+                        <span>Cidades populares:</span>
+                        <button class="city-tag" data-city="São Paulo">São Paulo</button>
+                        <button class="city-tag" data-city="Rio de Janeiro">Rio de Janeiro</button>
+                        <button class="city-tag" data-city="Belo Horizonte">Belo Horizonte</button>
+                        <button class="city-tag" data-city="Salvador">Salvador</button>
+                        <button class="city-tag" data-city="Brasília">Brasília</button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </footer>    
+
+        <!-- Current Weather Section -->
+        <div class="current-weather">
+            <div class="container">
+                <div id="weather-loading" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando dados climáticos...</p>
+                </div>
+
+                <div id="weather-content" class="weather-content" style="display: none;">
+                    <!-- Current Weather Card -->
+                    <div class="weather-card main-weather">
+                        <div class="weather-header">
+                            <div class="location-info">
+                                <h2 id="location-name">São Paulo</h2>
+                                <p id="location-details">Brasil</p>
+                            </div>
+                            <div class="weather-icon">
+                                <img id="weather-icon" src="" alt="Weather Icon">
+                                <span id="temperature">--°C</span>
+                            </div>
+                        </div>
+                        
+                        <div class="weather-description">
+                            <h3 id="weather-desc">Carregando...</h3>
+                            <p>Sensação térmica: <span id="feels-like">--°C</span></p>
+                        </div>
+
+                        <div class="weather-details">
+                            <div class="detail-item">
+                                <i class="fas fa-tint"></i>
+                                <span>Umidade</span>
+                                <strong id="humidity">--%</strong>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-wind"></i>
+                                <span>Vento</span>
+                                <strong id="wind-speed">-- km/h</strong>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-eye"></i>
+                                <span>Visibilidade</span>
+                                <strong id="visibility">-- km</strong>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-thermometer-half"></i>
+                                <span>Pressão</span>
+                                <strong id="pressure">-- mb</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Precipitation Card -->
+                    <div class="weather-card precipitation-card">
+                        <h3><i class="fas fa-cloud-rain"></i> Precipitação</h3>
+                        <div class="precipitation-info">
+                            <div class="precip-item">
+                                <span class="precip-label">Precipitação Atual</span>
+                                <span class="precip-value" id="precipitation">-- mm</span>
+                            </div>
+                            <div class="precip-gauge">
+                                <div class="gauge">
+                                    <div class="gauge-fill" id="precip-gauge"></div>
+                                </div>
+                                <div class="gauge-labels">
+                                    <span>0mm</span>
+                                    <span>50mm</span>
+                                    <span>100mm+</span>
+                                </div>
+                            </div>
+                            <div class="precip-status" id="precip-status">
+                                <i class="fas fa-sun"></i>
+                                <span>Sem chuva</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- UV Index Card -->
+                    <div class="weather-card uv-card">
+                        <h3><i class="fas fa-sun"></i> Índice UV</h3>
+                        <div class="uv-info">
+                            <div class="uv-value" id="uv-index">--</div>
+                            <div class="uv-status" id="uv-status">Carregando...</div>
+                            <div class="uv-bar">
+                                <div class="uv-fill" id="uv-fill"></div>
+                            </div>
+                            <div class="uv-scale">
+                                <span>Baixo</span>
+                                <span>Moderado</span>
+                                <span>Alto</span>
+                                <span>Muito Alto</span>
+                                <span>Extremo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="weather-error" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Ops! Algo deu errado</h3>
+                    <p>Não foi possível obter os dados climáticos. Verifique o nome da cidade e tente novamente.</p>
+                    <button class="btn btn-primary" onclick="loadWeatherData('São Paulo')">
+                        <i class="fas fa-redo"></i>
+                        Tentar Novamente
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Weather Info -->
+        <div class="additional-info">
+            <div class="container">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <i class="fas fa-thermometer-three-quarters"></i>
+                        <h4>Temperatura</h4>
+                        <p>Monitoramento em tempo real da temperatura ambiente e sensação térmica.</p>
+                        <div class="temp-range">
+                            <span>Hoje: <strong id="temp-range">-- / --°C</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <i class="fas fa-cloud-rain"></i>
+                        <h4>Precipitação</h4>
+                        <p>Acompanhe os níveis de chuva e umidade em tempo real.</p>
+                        <div class="weather-alert" id="rain-alert">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Sem alertas de chuva</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <i class="fas fa-wind"></i>
+                        <h4>Vento e Pressão</h4>
+                        <p>Informações detalhadas sobre condições atmosféricas.</p>
+                        <div class="wind-info">
+                            <span>Direção: <strong id="wind-direction">--</strong></span>
+                            <span>Rajadas: <strong id="wind-gust">-- km/h</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FORECAST SECTION - Previsão 7 Dias -->
+    <section id="forecast" class="section">
+        <!-- Forecast Header -->
+        <div class="forecast-header">
+            <div class="container">
+                <h1><i class="fas fa-chart-line"></i> Previsão do Tempo</h1>
+                <p>Previsão detalhada de 7 dias com análise de precipitação</p>
+                
+                <div class="forecast-search">
+                    <input type="text" id="forecast-city-input" placeholder="Digite a cidade..." value="São Paulo">
+                    <button id="forecast-search-btn" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Buscar Previsão
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forecast Content -->
+        <div class="forecast-content">
+            <div class="container">
+                <!-- Current Location -->
+                <div class="current-location">
+                    <h2 id="forecast-location">São Paulo, Brasil</h2>
+                    <p>Previsão para os próximos 7 dias</p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="forecast-loading" class="loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando previsão...</p>
+                </div>
+
+                <!-- Forecast Grid -->
+                <div id="forecast-grid" class="forecast-grid">
+                    <!-- Forecast cards will be generated here -->
+                </div>
+
+                <!-- Precipitation Chart -->
+                <div id="precipitation-chart" class="chart-container">
+                    <h3><i class="fas fa-cloud-rain"></i> Gráfico de Precipitação (7 dias)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="precip-chart" width="800" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="forecast-error" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Erro ao carregar previsão</h3>
+                    <p>Não foi possível obter a previsão do tempo. Tente novamente.</p>
+                    <button class="btn btn-primary" onclick="loadForecast('São Paulo')">
+                        <i class="fas fa-redo"></i>
+                        Tentar Novamente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HISTORY SECTION - Histórico -->
+    <section id="history" class="section">
+        <!-- History Header -->
+        <div class="history-header">
+            <div class="container">
+                <h1><i class="fas fa-history"></i> Histórico Climático</h1>
+                <p>Análise histórica de dados meteorológicos e padrões de precipitação</p>
+                
+                <div class="history-controls">
+                    <div class="control-group">
+                        <label for="history-city">Cidade:</label>
+                        <input type="text" id="history-city" placeholder="Digite a cidade..." value="São Paulo">
+                    </div>
+                    <div class="control-group">
+                        <label for="start-date">Data Inicial:</label>
+                        <input type="date" id="start-date">
+                    </div>
+                    <div class="control-group">
+                        <label for="end-date">Data Final:</label>
+                        <input type="date" id="end-date">
+                    </div>
+                    <button id="history-search-btn" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Consultar Histórico
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Content -->
+        <div class="history-content">
+            <div class="container">
+                <!-- Summary Cards -->
+                <div class="history-summary">
+                    <div class="summary-card">
+                        <i class="fas fa-thermometer-half"></i>
+                        <h3>Temperatura Média</h3>
+                        <span class="summary-value" id="avg-temp">24°C</span>
+                        <p>Últimos 30 dias</p>
+                    </div>
+                    <div class="summary-card">
+                        <i class="fas fa-cloud-rain"></i>
+                        <h3>Precipitação Total</h3>
+                        <span class="summary-value" id="total-precip">85 mm</span>
+                        <p>Acumulado no mês</p>
+                    </div>
+                    <div class="summary-card">
+                        <i class="fas fa-tint"></i>
+                        <h3>Umidade Média</h3>
+                        <span class="summary-value" id="avg-humidity">68%</span>
+                        <p>Média mensal</p>
+                    </div>
+                    <div class="summary-card">
+                        <i class="fas fa-calendar-day"></i>
+                        <h3>Dias com Chuva</h3>
+                        <span class="summary-value" id="rainy-days">12 dias</span>
+                        <p>No último mês</p>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="history-loading" class="loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Carregando histórico climático...</p>
+                </div>
+
+                <!-- Historical Data Table -->
+                <div id="history-table-container" class="table-container">
+                    <h3><i class="fas fa-table"></i> Dados Históricos Detalhados - São Paulo</h3>
+                    <div class="table-wrapper">
+                        <table id="history-table" class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Temperatura (°C)</th>
+                                    <th>Precipitação (mm)</th>
+                                    <th>Umidade (%)</th>
+                                    <th>Vento (km/h)</th>
+                                    <th>Condição</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-pagination">
+                        <button id="prev-page" class="btn btn-secondary">
+                            <i class="fas fa-chevron-left"></i>
+                            Anterior
+                        </button>
+                        <span id="page-info">Página 1 de 3</span>
+                        <button id="next-page" class="btn btn-secondary">
+                            Próximo
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div id="export-options" class="export-container">
+                    <h3><i class="fas fa-download"></i> Exportar Dados</h3>
+                    <div class="export-buttons">
+                        <button id="export-csv" class="btn btn-success">
+                            <i class="fas fa-file-csv"></i>
+                            Exportar CSV
+                        </button>
+                        <button id="export-json" class="btn btn-info">
+                            <i class="fas fa-file-code"></i>
+                            Exportar JSON
+                        </button>
+                        <button id="print-report" class="btn btn-secondary">
+                            <i class="fas fa-print"></i>
+                            Imprimir Relatório
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="history-error" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Erro ao carregar histórico</h3>
+                    <p>Não foi possível obter os dados históricos. Verifique os parâmetros e tente novamente.</p>
+                    <button class="btn btn-primary" onclick="loadHistoricalData()">
+                        <i class="fas fa-redo"></i>
+                        Tentar Novamente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>Weather Monitor</h4>
+                    <p>Sistema completo de monitoramento climático utilizando a API APILAYER WEATHERSTACK.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Recursos</h4>
+                    <ul>
+                        <li>Clima em tempo real</li>
+                        <li>Previsão 7 dias</li>
+                        <li>Dados históricos</li>
+                        <li>Alertas de precipitação</li>
+                    </ul>
+                </div>
+                <div class="footer-api">
+                    <h4>API Utilizada</h4>
+                    <p><strong>APILAYER WEATHERSTACK</strong></p>
+                    <p>Dados meteorológicos precisos e atualizados</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Weather Monitor. Projeto desenvolvido para demonstrar integração com APIs climáticas.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
 </body>
-
-
-
-
+</html>
