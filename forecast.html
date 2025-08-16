@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Monitor - Previsão 7 Dias</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-cloud-sun"></i>
+                <span>Weather Monitor</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Clima Atual
+                </a></li>
+                <li><a href="forecast.html" class="nav-link active">
+                    <i class="fas fa-chart-line"></i> Previsão 7 Dias
+                </a></li>
+                <li><a href="manage.html" class="nav-link">
+                    <i class="fas fa-heart"></i> Locais Favoritos
+                </a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Forecast Header -->
+    <div class="forecast-header">
+        <div class="container">
+            <h1><i class="fas fa-chart-line"></i> Previsão do Tempo</h1>
+            <p>Previsão detalhada de 7 dias com análise de precipitação</p>
+            
+            <div class="forecast-search">
+                <input type="text" id="forecast-city-input" placeholder="Digite a cidade..." value="São Paulo">
+                <button id="forecast-search-btn" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Buscar Previsão
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forecast Content -->
+    <div class="forecast-content">
+        <div class="container">
+            <!-- Current Location -->
+            <div class="current-location">
+                <h2 id="forecast-location">São Paulo, Brasil</h2>
+                <p>Previsão para os próximos 7 dias</p>
+                <p class="last-update">Última atualização: <span id="last-update">--</span></p>
+            </div>
+
+            <!-- Loading State -->
+            <div id="forecast-loading" class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Carregando previsão...</p>
+            </div>
+
+            <!-- Forecast Grid -->
+            <div id="forecast-grid" class="forecast-grid" style="display: none;">
+                <!-- Forecast cards will be generated here -->
+            </div>
+
+            <!-- Precipitation Chart -->
+            <div id="precipitation-chart" class="chart-container" style="display: none;">
+                <h3><i class="fas fa-cloud-rain"></i> Gráfico de Precipitação (7 dias)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="precip-chart" width="800" height="300"></canvas>
+                </div>
+                <div class="chart-info">
+                    <p><strong>Análise:</strong> Este gráfico mostra a precipitação esperada para cada dia da semana.</p>
+                    <p><strong>Fonte:</strong> Dados obtidos via API WEATHERSTACK</p>
+                </div>
+            </div>
+
+            <!-- Weekly Summary -->
+            <div id="weekly-summary" class="weekly-summary" style="display: none;">
+                <h3><i class="fas fa-calendar-week"></i> Resumo da Semana</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <i class="fas fa-thermometer-half"></i>
+                        <span class="summary-label">Temperatura Média</span>
+                        <span class="summary-value" id="avg-week-temp">--°C</span>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-cloud-rain"></i>
+                        <span class="summary-label">Total de Precipitação</span>
+                        <span class="summary-value" id="total-week-precip">-- mm</span>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-calendar-day"></i>
+                        <span class="summary-label">Dias com Chuva</span>
+                        <span class="summary-value" id="rainy-days-count">-- dias</span>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-wind"></i>
+                        <span class="summary-label">Vento Médio</span>
+                        <span class="summary-value" id="avg-week-wind">-- km/h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="forecast-error" class="error-message" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Erro ao carregar previsão</h3>
+                <p>Não foi possível obter a previsão do tempo. Tente novamente.</p>
+                <button class="btn btn-primary" onclick="loadForecast('São Paulo')">
+                    <i class="fas fa-redo"></i>
+                    Tentar Novamente
+                </button>
+            </div>
+
+            <!-- Navigation to other pages -->
+            <div class="page-navigation">
+                <h3><i class="fas fa-compass"></i> Explore Mais</h3>
+                <div class="nav-cards">
+                    <a href="index.html" class="nav-card">
+                        <i class="fas fa-thermometer-half"></i>
+                        <h4>Clima Atual</h4>
+                        <p>Veja as condições climáticas em tempo real</p>
+                    </a>
+                    <a href="manage.html" class="nav-card">
+                        <i class="fas fa-heart"></i>
+                        <h4>Locais Favoritos</h4>
+                        <p>Gerencie suas cidades favoritas</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>Weather Monitor</h4>
+                    <p>Sistema completo de monitoramento climático utilizando a API WEATHERSTACK.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Recursos</h4>
+                    <ul>
+                        <li>Clima em tempo real</li>
+                        <li>Previsão 7 dias</li>
+                        <li>Locais favoritos</li>
+                        <li>Alertas de precipitação</li>
+                    </ul>
+                </div>
+                <div class="footer-api">
+                    <h4>API Utilizada</h4>
+                    <p><strong>WEATHERSTACK API</strong></p>
+                    <p>Dados meteorológicos precisos e atualizados</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Weather Monitor. Projeto desenvolvido para demonstrar integração com APIs climáticas.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Initialize forecast page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            loadForecast('São Paulo');
+        });
+    </script>
+</body>
+</html>

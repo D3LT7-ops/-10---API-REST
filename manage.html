@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Monitor - Locais Favoritos</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-cloud-sun"></i>
+                <span>Weather Monitor</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Clima Atual
+                </a></li>
+                <li><a href="forecast.html" class="nav-link">
+                    <i class="fas fa-chart-line"></i> Previsão 7 Dias
+                </a></li>
+                <li><a href="manage.html" class="nav-link active">
+                    <i class="fas fa-heart"></i> Locais Favoritos
+                </a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Manage Header -->
+    <div class="manage-header">
+        <div class="container">
+            <h1><i class="fas fa-heart"></i> Gerenciar Locais Favoritos</h1>
+            <p>Adicione, remova e organize suas cidades favoritas para acesso rápido</p>
+        </div>
+    </div>
+
+    <!-- Add New Favorite -->
+    <div class="add-favorite-section">
+        <div class="container">
+            <div class="add-favorite-card">
+                <h3><i class="fas fa-plus-circle"></i> Adicionar Nova Cidade</h3>
+                <div class="add-favorite-form">
+                    <div class="form-group">
+                        <label for="new-city-input">Nome da Cidade:</label>
+                        <input type="text" id="new-city-input" placeholder="Digite o nome da cidade..." required>
+                    </div>
+                    <div class="form-group">
+                        <label for="city-country">País (opcional):</label>
+                        <input type="text" id="city-country" placeholder="Ex: Brasil, Argentina..." value="Brasil">
+                    </div>
+                    <div class="form-group">
+                        <label for="city-nickname">Apelido (opcional):</label>
+                        <input type="text" id="city-nickname" placeholder="Ex: Minha cidade natal...">
+                    </div>
+                    <button id="add-city-btn" class="btn btn-success">
+                        <i class="fas fa-plus"></i>
+                        Adicionar aos Favoritos
+                    </button>
+                </div>
+
+                <!-- Quick Add Buttons -->
+                <div class="quick-add-section">
+                    <h4>Cidades Populares:</h4>
+                    <div class="quick-add-buttons">
+                        <button class="btn btn-secondary quick-add" data-city="São Paulo" data-country="Brasil">São Paulo</button>
+                        <button class="btn btn-secondary quick-add" data-city="Rio de Janeiro" data-country="Brasil">Rio de Janeiro</button>
+                        <button class="btn btn-secondary quick-add" data-city="Belo Horizonte" data-country="Brasil">Belo Horizonte</button>
+                        <button class="btn btn-secondary quick-add" data-city="Salvador" data-country="Brasil">Salvador</button>
+                        <button class="btn btn-secondary quick-add" data-city="Brasília" data-country="Brasil">Brasília</button>
+                        <button class="btn btn-secondary quick-add" data-city="Porto Alegre" data-country="Brasil">Porto Alegre</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites List -->
+    <div class="favorites-section">
+        <div class="container">
+            <div class="favorites-header">
+                <h3><i class="fas fa-list"></i> Suas Cidades Favoritas</h3>
+                <div class="favorites-stats">
+                    <span id="favorites-count">0 cidades</span>
+                    <button id="clear-all-btn" class="btn btn-danger" style="display: none;">
+                        <i class="fas fa-trash"></i>
+                        Limpar Todas
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="favorites-loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Carregando favoritos...</p>
+            </div>
+
+            <!-- Favorites Grid -->
+            <div id="favorites-grid" class="favorites-grid">
+                <!-- Empty state -->
+                <div id="empty-favorites" class="empty-state">
+                    <i class="fas fa-heart-broken"></i>
+                    <h4>Nenhuma cidade favorita</h4>
+                    <p>Adicione suas primeiras cidades favoritas usando o formulário acima!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions-section" style="display: none;">
+        <div class="container">
+            <div class="bulk-actions-card">
+                <h3><i class="fas fa-tools"></i> Ações em Lote</h3>
+                <div class="bulk-actions">
+                    <button id="export-favorites-btn" class="btn btn-info">
+                        <i class="fas fa-download"></i>
+                        Exportar Favoritos
+                    </button>
+                    <button id="import-favorites-btn" class="btn btn-success">
+                        <i class="fas fa-upload"></i>
+                        Importar Favoritos
+                    </button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-section">
+        <div class="container">
+            <h3><i class="fas fa-chart-pie"></i> Estatísticas dos Favoritos</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span class="stat-label">Total de Cidades</span>
+                    <span class="stat-value" id="total-cities">0</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-globe-americas"></i>
+                    <span class="stat-label">Países Diferentes</span>
+                    <span class="stat-value" id="total-countries">0</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span class="stat-label">Adicionadas Hoje</span>
+                    <span class="stat-value" id="added-today">0</span>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-eye"></i>
+                    <span class="stat-label">Mais Visualizada</span>
+                    <span class="stat-value" id="most-viewed">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation to other pages -->
+    <div class="page-navigation">
+        <div class="container">
+            <h3><i class="fas fa-compass"></i> Explore Mais</h3>
+            <div class="nav-cards">
+                <a href="index.html" class="nav-card">
+                    <i class="fas fa-thermometer-half"></i>
+                    <h4>Clima Atual</h4>
+                    <p>Veja as condições climáticas em tempo real</p>
+                </a>
+                <a href="forecast.html" class="nav-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Previsão 7 Dias</h4>
+                    <p>Consulte a previsão detalhada do tempo</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>Weather Monitor</h4>
+                    <p>Sistema completo de monitoramento climático utilizando a API WEATHERSTACK.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Recursos</h4>
+                    <ul>
+                        <li>Clima em tempo real</li>
+                        <li>Previsão 7 dias</li>
+                        <li>Locais favoritos</li>
+                        <li>Alertas de precipitação</li>
+                    </ul>
+                </div>
+                <div class="footer-api">
+                    <h4>API Utilizada</h4>
+                    <p><strong>WEATHERSTACK API</strong></p>
+                    <p>Dados meteorológicos precisos e atualizados</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Weather Monitor. Projeto desenvolvido para demonstrar integração com APIs climáticas.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Initialize manage page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeManagePage();
+        });
+    </script>
+</body>
+</html>
