@@ -7,6 +7,28 @@
     <link rel="stylesheet" href="css/estilo.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+    /* Garante que o menu fique acima de tudo no mobile */
+.nav-menu {
+    z-index: 2000; /* antes não tinha */
+}
+
+/* No mobile, joga search/notifications/theme para dentro do menu */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-wrap: wrap;
+    }
+
+    .nav-menu {
+        order: 2;
+    }
+
+    .nav-search,
+    .nav-notifications,
+    .theme-toggle {
+        order: 3;
+        margin: 1rem auto 0;
+    }
+}
         /* Enhanced Navbar Styles */
         .navbar {
             background: rgba(255, 255, 255, 0.95);
@@ -670,26 +692,46 @@
             </a>
 
             <ul class="nav-menu" id="nav-menu">
-                <li>
-                    <a href="index.html" class="nav-link" data-page="home">
-                        <i class="fas fa-home"></i>
-                        <span>Clima Atual</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="alerts.html" class="nav-link active" data-page="alerts">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Alertas</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="manage.html" class="nav-link" data-page="favorites">
-                        <i class="fas fa-heart"></i>
-                        <span>Favoritos</span>
-                    </a>
-                </li>
-            </ul>
+    <li>
+        <a href="index.html" class="nav-link active" data-page="home">
+            <i class="fas fa-home"></i>
+            <span>Clima Atual</span>
+        </a>
+    </li>
+    <li>
+        <a href="alerts.html" class="nav-link" data-page="alerts">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Alertas</span>
+        </a>
+    </li>
+    <li>
+        <a href="manage.html" class="nav-link" data-page="favorites">
+            <i class="fas fa-heart"></i>
+            <span>Favoritos</span>
+        </a>
+    </li>
 
+    <!-- Agora dentro da lista -->
+    <li class="nav-search">
+        <input type="text" class="search-input" id="nav-search-input" placeholder="Buscar cidade...">
+        <button class="search-toggle" id="search-toggle">
+            <i class="fas fa-search"></i>
+        </button>
+    </li>
+
+    <li class="nav-notifications">
+        <button class="notification-btn" id="notification-btn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-badge">3</span>
+        </button>
+    </li>
+
+    <li>
+        <button class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </li>
+</ul>
             <!-- Search Feature -->
             <div class="nav-search">
                 <input type="text" class="search-input" id="nav-search-input" placeholder="Buscar cidade...">
