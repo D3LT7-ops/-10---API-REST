@@ -680,6 +680,25 @@
             font-size: 2rem;
             color: #2c3e50;
         }
+        /* Garante que os links do menu sejam sempre clicáveis */
+.nav-link {
+    position: relative;
+    z-index: 5;
+}
+
+/* Corrige a barra de busca no desktop para não cobrir botões */
+@media (min-width: 769px) {
+    .nav-search {
+        position: relative;
+        z-index: 4;
+    }
+
+    .nav-notifications,
+    .theme-toggle {
+        position: relative;
+        z-index: 4;
+    }
+}
     </style>
 </head>
 <body>
