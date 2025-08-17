@@ -34,22 +34,17 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-function initializeApp() {
-    // Detectar página atual
-    const currentPage = getCurrentPage();
-    
-    // Inicializar baseado na página
-    switch(currentPage) {
-        case 'index':
-            initializeHomePage();
-            break;
-        case 'forecast':
-            initializeForecastPage();
-            break;
-        case 'manage':
-            initializeManagePage();
-            break;
-    }
+switch(currentPage) {
+    case 'index':
+        initializeHomePage();
+        break;
+    case 'alerts':                    // NOVO CASE
+        initializeAlertsPage();
+        break;
+    case 'manage':
+        initializeManagePage();
+        break;
+}
     
     // Carregar favoritos (usado em todas as páginas)
     loadFavoriteLocations();
@@ -57,7 +52,7 @@ function initializeApp() {
 
 function getCurrentPage() {
     const path = window.location.pathname;
-    if (path.includes('forecast.html')) return 'forecast';
+    if (path.includes('alerts.html')) return 'alerts';  // ADICIONAR ESTA LINHA
     if (path.includes('manage.html')) return 'manage';
     return 'index'; // default
 }
@@ -1293,7 +1288,7 @@ window.addEventListener('offline', () => {
 // Disponibilizar funções globalmente
 window.weatherMonitor = {
     loadWeatherData,
-    loadForecast,
+    loadWeatherAlerts,    // NOVA LINHA
     addToFavorites,
     removeFavorite,
     getCurrentPage,
