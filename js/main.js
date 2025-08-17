@@ -31,30 +31,73 @@ let currentCity = 'São Paulo';
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Iniciando aplicação...');
     initializeApp();
 });
 
-switch(currentPage) {
-    case 'index':
-        initializeHomePage();
-        break;
-    case 'alerts':                    // NOVO CASE
-        initializeAlertsPage();
-        break;
-    case 'manage':
-        initializeManagePage();
-        break;
-}
-  {  
+function initializeApp() {
+    const currentPage = getCurrentPage();
+    console.log('Página atual:', currentPage);
+    
+    // Inicializar baseado na página atual
+    switch(currentPage) {
+        case 'index':
+            initializeHomePage();
+            break;
+        case 'alerts':
+            initializeAlertsPage();
+            break;
+        case 'forecast':  // ADICIONADO CASE PARA FORECAST
+            initializeForecastPage();
+            break;
+        case 'manage':
+            initializeManagePage();
+            break;
+        default:
+            initializeHomePage();
+    }
+    
     // Carregar favoritos (usado em todas as páginas)
     loadFavoriteLocations();
+    
+    console.log('Aplicação inicializada com sucesso!');
 }
 
 function getCurrentPage() {
     const path = window.location.pathname;
-    if (path.includes('alerts.html')) return 'alerts';  // ADICIONAR ESTA LINHA
+    if (path.includes('alerts.html')) return 'alerts';
+    if (path.includes('forecast.html')) return 'forecast';  // ADICIONADO
     if (path.includes('manage.html')) return 'manage';
     return 'index'; // default
+}
+
+// ===========================================
+// INICIALIZAÇÃO - PÁGINA DE ALERTAS
+// ===========================================
+
+function initializeAlertsPage() {
+    console.log('Inicializando página de alertas...');
+    // Implementar lógica específica da página de alertas aqui
+    setupAlertsEventListeners();
+    loadWeatherAlerts();
+}
+
+function setupAlertsEventListeners() {
+    // Implementar event listeners específicos da página de alertas
+    console.log('Configurando event listeners da página de alertas');
+}
+
+function loadWeatherAlerts() {
+    // Implementar carregamento de alertas meteorológicos
+    console.log('Carregando alertas meteorológicos...');
+    
+    // Exemplo de implementação básica
+    showLoading('alerts');
+    
+    setTimeout(() => {
+        hideLoading('alerts');
+        console.log('Alertas carregados (simulado)');
+    }, 1000);
 }
 
 // ===========================================
@@ -62,6 +105,7 @@ function getCurrentPage() {
 // ===========================================
 
 function initializeHomePage() {
+    console.log('Inicializando página inicial...');
     setupHomeEventListeners();
     loadWeatherData(currentCity);
 }
@@ -73,12 +117,14 @@ function setupHomeEventListeners() {
 
     if (searchBtn) {
         searchBtn.addEventListener('click', handleHomeSearch);
+        console.log('Event listener do botão de busca configurado');
     }
     
     if (cityInput) {
         cityInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') handleHomeSearch();
         });
+        console.log('Event listener do input de cidade configurado');
     }
 
     // Quick city buttons
@@ -103,6 +149,7 @@ function handleHomeSearch() {
     const cityInput = document.getElementById('city-input');
     const city = cityInput ? cityInput.value.trim() : '';
     if (city) {
+        console.log('Pesquisando cidade:', city);
         currentCity = city;
         loadWeatherData(city);
     }
@@ -113,6 +160,7 @@ function handleHomeSearch() {
 // ===========================================
 
 function initializeForecastPage() {
+    console.log('Inicializando página de previsão...');
     setupForecastEventListeners();
     loadForecast(currentCity);
 }
@@ -146,6 +194,7 @@ function handleForecastSearch() {
 // ===========================================
 
 function initializeManagePage() {
+    console.log('Inicializando página de gerenciamento...');
     setupManageEventListeners();
     loadFavoritesList();
     updateFavoritesStats();
@@ -201,14 +250,17 @@ function setupManageEventListeners() {
 // ===========================================
 
 async function loadWeatherData(city) {
+    console.log('Carregando dados climáticos para:', city);
     showLoading('weather');
     
     try {
         let data;
         
         if (DEMO_MODE) {
+            console.log('Usando modo demo');
             data = await simulateCurrentWeatherData(city);
         } else {
+            console.log('Fazendo requisição para API real');
             // Requisição GET real para API
             const response = await fetch(
                 `${API_CONFIG.BASE_URL}?access_key=${API_CONFIG.KEY}&query=${encodeURIComponent(city)}&units=m`
@@ -227,6 +279,7 @@ async function loadWeatherData(city) {
 
         currentWeatherData = data;
         displayWeatherData(data);
+        console.log('Dados climáticos carregados com sucesso');
         
     } catch (error) {
         console.error('Erro ao carregar dados climáticos:', error);
@@ -235,6 +288,7 @@ async function loadWeatherData(city) {
 }
 
 async function loadForecast(city) {
+    console.log('Carregando previsão para:', city);
     showLoading('forecast');
     
     try {
@@ -615,6 +669,7 @@ function loadFavoriteLocations() {
             ];
             saveFavoritesToStorage();
         }
+        console.log('Favoritos carregados:', favoriteLocations.length, 'itens');
     } catch (error) {
         console.error('Erro ao carregar favoritos:', error);
         favoriteLocations = [];
@@ -624,6 +679,7 @@ function loadFavoriteLocations() {
 function saveFavoritesToStorage() {
     try {
         localStorage.setItem('weatherMonitorFavorites', JSON.stringify(favoriteLocations));
+        console.log('Favoritos salvos no localStorage');
     } catch (error) {
         console.error('Erro ao salvar favoritos:', error);
     }
@@ -1288,7 +1344,7 @@ window.addEventListener('offline', () => {
 // Disponibilizar funções globalmente
 window.weatherMonitor = {
     loadWeatherData,
-    loadWeatherAlerts,    // NOVA LINHA
+    loadWeatherAlerts,
     addToFavorites,
     removeFavorite,
     getCurrentPage,
