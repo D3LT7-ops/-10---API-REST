@@ -45,7 +45,7 @@ switch(currentPage) {
         initializeManagePage();
         break;
 }
-    
+  {  
     // Carregar favoritos (usado em todas as páginas)
     loadFavoriteLocations();
 }
