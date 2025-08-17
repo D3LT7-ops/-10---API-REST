@@ -357,27 +357,47 @@
                 <i class="fas fa-cloud-sun"></i>
                 <span>Weather Monitor</span>
             </a>
+<ul class="nav-menu" id="nav-menu">
+    <li>
+        <a href="index.html" class="nav-link active" data-page="home">
+            <i class="fas fa-home"></i>
+            <span>Clima Atual</span>
+        </a>
+    </li>
+    <li>
+        <a href="alerts.html" class="nav-link" data-page="alerts">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Alertas</span>
+        </a>
+    </li>
+    <li>
+        <a href="manage.html" class="nav-link" data-page="favorites">
+            <i class="fas fa-heart"></i>
+            <span>Favoritos</span>
+        </a>
+    </li>
 
-            <ul class="nav-menu" id="nav-menu">
-                <li>
-                    <a href="index.html" class="nav-link active" data-page="home">
-                        <i class="fas fa-home"></i>
-                        <span>Clima Atual</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="alerts.html" class="nav-link" data-page="alerts">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Alertas</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="manage.html" class="nav-link" data-page="favorites">
-                        <i class="fas fa-heart"></i>
-                        <span>Favoritos</span>
-                    </a>
-                </li>
-            </ul>
+    <!-- Agora dentro da lista -->
+    <li class="nav-search">
+        <input type="text" class="search-input" id="nav-search-input" placeholder="Buscar cidade...">
+        <button class="search-toggle" id="search-toggle">
+            <i class="fas fa-search"></i>
+        </button>
+    </li>
+
+    <li class="nav-notifications">
+        <button class="notification-btn" id="notification-btn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-badge">3</span>
+        </button>
+    </li>
+
+    <li>
+        <button class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-moon"></i>
+        </button>
+    </li>
+</ul>
 
             <!-- Search Feature -->
             <div class="nav-search">
