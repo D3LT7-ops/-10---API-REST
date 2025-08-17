@@ -7,11 +7,327 @@
     <link rel="stylesheet" href="css/estilo.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Enhanced Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            transform: scale(1.05);
+            color: #667eea;
+        }
+
+        .nav-logo i {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            left: 0;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover i {
+            transform: scale(1.2);
+        }
+
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            gap: 4px;
+        }
+
+        .nav-toggle span {
+            width: 25px;
+            height: 3px;
+            background: #2c3e50;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .nav-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        .nav-search {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .search-input {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            outline: none;
+            transition: all 0.3s ease;
+            width: 0;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .search-input.active {
+            width: 200px;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-toggle {
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            color: #2c3e50;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .search-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.1);
+        }
+
+        .nav-notifications {
+            position: relative;
+            margin-left: 1rem;
+        }
+
+        .notification-btn {
+            padding: 0.75rem;
+            border: none;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            60% { transform: translateY(-3px); }
+        }
+
+        .theme-toggle {
+            margin-left: 1rem;
+            padding: 0.75rem;
+            border: none;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1) rotate(180deg);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .nav-toggle {
+                display: flex;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 2rem 0;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .nav-menu.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-link {
+                width: 90%;
+                margin: 0 auto;
+                justify-content: center;
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-search {
+                margin: 1rem auto 0;
+            }
+
+            .search-input.active {
+                width: 250px;
+            }
+
+            .nav-notifications {
+                margin: 1rem auto 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-logo span {
+                display: none;
+            }
+
+            .nav-link span {
+                display: none;
+            }
+
+            .search-input.active {
+                width: 200px;
+            }
+        }
+
+        /* Adjust alerts header for fixed navbar */
         .alerts-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 2rem 0;
             text-align: center;
+            margin-top: 70px;
         }
 
         .alerts-search {
@@ -37,6 +353,7 @@
             color: rgba(255,255,255,0.7);
         }
 
+        /* Rest of the existing alert styles... */
         .alert-card {
             background: white;
             border-radius: 15px;
@@ -341,47 +658,65 @@
             font-size: 2rem;
             color: #2c3e50;
         }
-
-        @media (max-width: 768px) {
-            .alerts-search {
-                flex-direction: column;
-            }
-            
-            .alert-header {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .alert-details {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .radar-container {
-                width: 250px;
-                height: 250px;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
+    <!-- Enhanced Navigation -->
+    <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
+            <a href="index.html" class="nav-logo">
                 <i class="fas fa-cloud-sun"></i>
                 <span>Weather Monitor</span>
-            </div>
-           <ul class="nav-menu">
-                <li><a href="index.html" class="nav-link active">
-                    <i class="fas fa-home"></i> Clima Atual
-                </a></li>
-               <li><a href="alerts.html" class="nav-link active">
-                    <i class="fas fa-chart-line"></i> alertas
-                </a></li>
-                <li><a href="manage.html" class="nav-link">
-                    <i class="fas fa-heart"></i> Locais Favoritos
-                </a></li>
+            </a>
+
+            <ul class="nav-menu" id="nav-menu">
+                <li>
+                    <a href="index.html" class="nav-link" data-page="home">
+                        <i class="fas fa-home"></i>
+                        <span>Clima Atual</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="alerts.html" class="nav-link active" data-page="alerts">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Alertas</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="manage.html" class="nav-link" data-page="favorites">
+                        <i class="fas fa-heart"></i>
+                        <span>Favoritos</span>
+                    </a>
+                </li>
             </ul>
+
+            <!-- Search Feature -->
+            <div class="nav-search">
+                <input type="text" class="search-input" id="nav-search-input" placeholder="Buscar cidade...">
+                <button class="search-toggle" id="search-toggle">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Notifications -->
+            <div class="nav-notifications">
+                <button class="notification-btn" id="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notification-badge">5</span>
+                </button>
+            </div>
+
+            <!-- Theme Toggle -->
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="nav-toggle" id="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
 
@@ -574,12 +909,194 @@
     </footer>
 
     <script src="js/main.js"></script>
+
+    <!-- Enhanced Navbar Script -->
     <script>
-        // Initialize alerts page when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        class WeatherNavbar {
+            constructor() {
+                this.navbar = document.getElementById('navbar');
+                this.navToggle = document.getElementById('nav-toggle');
+                this.navMenu = document.getElementById('nav-menu');
+                this.searchToggle = document.getElementById('search-toggle');
+                this.searchInput = document.getElementById('nav-search-input');
+                this.themeToggle = document.getElementById('theme-toggle');
+                this.notificationBtn = document.getElementById('notification-btn');
+                
+                this.init();
+            }
+
+            init() {
+                this.setupScrollEffect();
+                this.setupMobileMenu();
+                this.setupSearch();
+                this.setupThemeToggle();
+                this.setupNotifications();
+                this.setupActiveLink();
+                this.setupKeyboardShortcuts();
+            }
+
+            setupScrollEffect() {
+                let lastScrollY = window.scrollY;
+                
+                window.addEventListener('scroll', () => {
+                    const currentScrollY = window.scrollY;
+                    
+                    if (currentScrollY > 50) {
+                        this.navbar.classList.add('scrolled');
+                    } else {
+                        this.navbar.classList.remove('scrolled');
+                    }
+                    
+                    lastScrollY = currentScrollY;
+                });
+            }
+
+            setupMobileMenu() {
+                this.navToggle.addEventListener('click', () => {
+                    this.navToggle.classList.toggle('active');
+                    this.navMenu.classList.toggle('active');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!this.navbar.contains(e.target)) {
+                        this.navToggle.classList.remove('active');
+                        this.navMenu.classList.remove('active');
+                    }
+                });
+
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        this.navToggle.classList.remove('active');
+                        this.navMenu.classList.remove('active');
+                    });
+                });
+            }
+
+            setupSearch() {
+                this.searchToggle.addEventListener('click', () => {
+                    this.searchInput.classList.toggle('active');
+                    if (this.searchInput.classList.contains('active')) {
+                        setTimeout(() => this.searchInput.focus(), 300);
+                    }
+                });
+
+                this.searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const query = this.searchInput.value.trim();
+                        if (query) {
+                            this.performSearch(query);
+                        }
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.nav-search')) {
+                        this.searchInput.classList.remove('active');
+                    }
+                });
+            }
+
+            setupThemeToggle() {
+                this.themeToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('dark-theme');
+                    const icon = this.themeToggle.querySelector('i');
+                    
+                    if (document.body.classList.contains('dark-theme')) {
+                        icon.className = 'fas fa-sun';
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        icon.className = 'fas fa-moon';
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    this.themeToggle.querySelector('i').className = 'fas fa-sun';
+                }
+            }
+
+            setupNotifications() {
+                this.notificationBtn.addEventListener('click', () => {
+                    this.showNotifications();
+                    this.updateNotificationCount(0);
+                });
+
+                setInterval(() => {
+                    const currentCount = parseInt(document.getElementById('notification-badge').textContent);
+                    if (Math.random() < 0.3 && currentCount < 9) {
+                        this.updateNotificationCount(currentCount + 1);
+                    }
+                }, 10000);
+            }
+
+            setupActiveLink() {
+                const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+                const navLinks = document.querySelectorAll('.nav-link');
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    const href = link.getAttribute('href');
+                    
+                    if (href === currentPage || 
+                        (currentPage === 'alerts.html' && href === 'alerts.html')) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        this.searchInput.classList.add('active');
+                        setTimeout(() => this.searchInput.focus(), 100);
+                    }
+                    
+                    if (e.key === 'Escape') {
+                        this.searchInput.classList.remove('active');
+                        this.searchInput.blur();
+                    }
+                });
+            }
+
+            performSearch(query) {
+                console.log('Searching for:', query);
+                
+                // Integration with existing search functionality
+                const cityInput = document.getElementById('alert-city-input');
+                if (cityInput) {
+                    cityInput.value = query;
+                    if (typeof loadWeatherAlerts === 'function') {
+                        loadWeatherAlerts(query);
+                    }
+                }
+                
+                this.searchInput.value = '';
+                this.searchInput.classList.remove('active');
+            }
+
+            updateNotificationCount(count) {
+                const badge = document.getElementById('notification-badge');
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            showNotifications() {
+                alert('Alertas Recentes:\n• Tempestade se aproximando de São Paulo\n• Ventos fortes no Rio de Janeiro\n• Chuvas intensas previstas\n• Sistema de monitoramento ativo');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new WeatherNavbar();
             loadWeatherAlerts('São Paulo');
             
-            // Setup search functionality
             const searchBtn = document.getElementById('alert-search-btn');
             const cityInput = document.getElementById('alert-city-input');
             
@@ -603,12 +1120,9 @@
                 });
             }
             
-            // Setup filters
             setupAlertFilters();
-            
-            // Update radar time
             updateRadarTime();
-            setInterval(updateRadarTime, 30000); // Update every 30 seconds
+            setInterval(updateRadarTime, 30000);
         });
         
         function setupAlertFilters() {
@@ -623,9 +1137,7 @@
         }
         
         function applyAlertFilters() {
-            // Filter functionality will be implemented based on your needs
             console.log('Applying alert filters...');
-            // You can implement the filtering logic here
         }
         
         function updateRadarTime() {
