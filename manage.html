@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/estilo.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+
+    
     /* Garante que o menu fique acima de tudo no mobile */
 .nav-menu {
     z-index: 2000; /* antes não tinha */
@@ -353,15 +355,8 @@
     z-index: 5;
 }
 
-/* Corrige a barra de busca no desktop para não cobrir botões */
 @media (min-width: 769px) {
     .nav-search {
-        position: relative;
-        z-index: 4;
-    }
-
-    .nav-notifications,
-    .theme-toggle {
         position: relative;
         z-index: 4;
     }
@@ -369,7 +364,6 @@
     </style>
 </head>
 <body>
-    <!-- Enhanced Navigation - Same as index.html -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="index.html" class="nav-logo">
@@ -395,57 +389,6 @@
             <span>Favoritos</span>
         </a>
     </li>
-
-    <!-- Agora dentro da lista -->
-    <li class="nav-search">
-        <input type="text" class="search-input" id="nav-search-input" placeholder="Buscar cidade...">
-        <button class="search-toggle" id="search-toggle">
-            <i class="fas fa-search"></i>
-        </button>
-    </li>
-
-    <li class="nav-notifications">
-        <button class="notification-btn" id="notification-btn">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notification-badge">3</span>
-        </button>
-    </li>
-
-    <li>
-        <button class="theme-toggle" id="theme-toggle">
-            <i class="fas fa-moon"></i>
-        </button>
-    </li>
-</ul>
-
-            <!-- Search Feature -->
-            <div class="nav-search">
-                <input type="text" class="search-input" id="nav-search-input" placeholder="Buscar cidade...">
-                <button class="search-toggle" id="search-toggle">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-
-            <!-- Notifications -->
-            <div class="nav-notifications">
-                <button class="notification-btn" id="notification-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge" id="notification-badge">3</span>
-                </button>
-            </div>
-
-            <!-- Theme Toggle -->
-            <button class="theme-toggle" id="theme-toggle">
-                <i class="fas fa-moon"></i>
-            </button>
-
-            <!-- Mobile Menu Toggle -->
-            <button class="nav-toggle" id="nav-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
     </nav>
 
     <!-- Manage Header -->
