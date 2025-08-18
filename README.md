@@ -1,49 +1,65 @@
 # -10---API-REST
+Weather App - Consulta Meteorológica
+Desenvolvido por: Helberth Renan Gomes de Sousa
+# Descrição e Objetivo do Projeto
+O Weather App é uma aplicação web que permite aos usuários consultar informações meteorológicas em tempo real de diferentes cidades ao redor do mundo. O projeto utiliza a API WeatherStack para obter dados atualizados sobre condições climáticas, incluindo temperatura, umidade, velocidade do vento, pressão atmosférica e muito mais.
+### Funcionalidades Principais:
 
-# Weather Monitor - Sistema de Monitoramento Climático
+- Consulta de dados meteorológicos reais por cidade
+- Exibição de informações detalhadas do clima atual
+- Sistema de cidades favoritas
+- Histórico de pesquisas recentes
+- Interface responsiva e moderna
+ 
+Tecnologias Utilizadas
 
-**Desenvolvido por:** [Helbeerth Renan Gomes De Sousa]
+# Frontend:
 
-## Descrição e Objetivo do Projeto
-
-O Weather Monitor é um sistema completo de monitoramento climático que utiliza a **APILAYER WEATHERSTACK API** para fornecer informações meteorológicas em tempo real, previsões do tempo e análises históricas com foco especial em **precipitação de chuvas**.
-
-
-
-
-## 🔧 Modo Demonstração
-
-O projeto inclui um **modo demonstração** que simula dados da API para fins de teste:
-
-```javascript
-const DEMO_MODE = false; // deixei destvado , para para funcionar com dados reais da api 
-
-// Dados simulados para 5 cidades brasileiras:
-- São Paulo (Parcialmente nublado, 23°C, 2.5mm precipitação)
-- Rio de Janeiro (Ensolarado, 28°C, 0mm precipitação)  
-- Belo Horizonte (Nublado, 21°C, 5.2mm precipitação)
-- Salvador (Parcialmente nublado, 30°C, 1.8mm precipitação)
-- Brasília (Claro, 24°C, 0mm precipitação)
+HTML5
+CSS3 (com Flexbox e Grid)
+JavaScript (ES6+)
+Responsive Design
 
 
-## Limitações da API Gratuita
-
-- **1.000 requisições/mês** no plano gratuito
-- **Dados atuais apenas** (previsão e histórico requerem planos pagos)
-- **HTTPS necessário** para produção (planos pagos)
-- **Rate limiting**: Máximo 1 requisição por segundo
+# API:
+WeatherStack API (http://weatherstack.com/)
 
 
+## Tabela de Requisições por Página
 
-### Links Úteis
-- **API Documentation**: [https://weatherstack.com/documentation]
+| Página         | Tipo de Requisição| Endpoint                                                                         | Descrição |
+|----------------|-------------------|----------------------------------------------------------------------------------|
+| index.html     | GET               | `https://api.weatherstack.com/current?access_key={API_KEY}&query={city}&units=m` | Buscar dados meteorológicos **reais** da cidade |
+| index.html     | POST              | `/favorites` (simulado localmente).                                              | Adicionar cidade aos favoritos |
+| favorites.html | GET               | `/favorites` (simulado localmente)                                               | Listar cidades favoritas |
+| favorites.html | DELETE            | `/favorites/{id}` (simulado localmente)                                          |Remover cidade dos favoritos |
+| history.html   | GET               | `/history` (simulado localmente)                                                 | Exibir histórico de pesquisas |
 
 
-## Créditos
+## **Limitações da API Gratuita:**
+   - Plan gratuito: 1.000 requisições/mês
+   - Apenas requisições GET (não POST/PUT/DELETE)
+   - Por isso favoritos/histórico são simulados localmente
 
-### Fontes de Referência Utilizadas
-- **APILAYER WEATHERSTACK**: Dados meteorológicos
-- **Font Awesome**: Biblioteca de ícones
-- **MDN Web Docs**: Documentação técnica
-- **CSS Grid Guide**: Layout responsivo
-- **Canvas API Tutorial**: Gráficos customizados
+
+
+
+## Responsividade
+
+O projeto foi testado e é compatível com:
+- Desktop (1200px+)
+- Tablet (768px - 1199px)
+- Mobile (até 767px)
+
+
+## Créditos - Fontes de Referência
+
+- **API de Dados:** [WeatherStack API](https://weatherstack.com/)
+- **Ícones Meteorológicos:** WeatherStack Icons
+- **Documentação CSS:** [MDN Web Docs](https://developer.mozilla.org/)
+- **Documentação JavaScript:** [MDN Web Docs](https://developer.mozilla.org/)
+- **Inspiração de Design:** [Dribbble](https://dribbble.com/)
+- **Gradientes CSS:** [UI Gradients](https://uigradients.com/)
+- **Fontes:** Google Fonts (Arial como fallback)
+
+
