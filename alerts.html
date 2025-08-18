@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="css/estilo.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-    /* Garante que o menu fique acima de tudo no mobile */
-.nav-menu {
-    z-index: 2000; /* antes não tinha */
-}
+
 
 /* No mobile, joga search/notifications/theme para dentro do menu */
 @media (max-width: 768px) {
@@ -20,13 +17,6 @@
 
     .nav-menu {
         order: 2;
-    }
-
-    .nav-search,
-    .nav-notifications,
-    .theme-toggle {
-        order: 3;
-        margin: 1rem auto 0;
     }
 }
         /* Enhanced Navbar Styles */
