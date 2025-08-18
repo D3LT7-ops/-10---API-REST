@@ -4,9 +4,9 @@
 
 const API_CONFIG = {
     KEY: '99a15dbcafb7db271f431e7751086382', 
-    BASE_URL: 'https://api.weatherstack.com/current.json',
-    FORECAST_URL: 'https://api.weatherstack.com/forecast.json',
-    HISTORY_URL: 'https://api.weatherstack.com/historical.json'
+    BASE_URL: 'https://api.weatherstack.com/current',
+    FORECAST_URL: 'https://api.weatherstack.com/forecast',
+    HISTORY_URL: 'https://api.weatherstack.com/historical'
 };
 
 // Para demonstração - simula uma API fake para favoritos
