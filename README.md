@@ -74,3 +74,5 @@ O projeto foi testado e é compatível com:
 - **Fontes:** Google Fonts (Arial como fallback)
 
 
+# Licença
+Este projeto é de uso livre e está licenciado sob a [MIT License](https://opensource.org/licenses/MIT).
