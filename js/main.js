@@ -1,4 +1,131 @@
 // ===========================================
+// API GLOBAL PARA USO EM OUTRAS PÁGINAS (ATUALIZADA)
+// ===========================================
+
+window.weatherMonitor = {
+    // Funções principais
+    loadWeatherData,
+    loadWeatherAlerts,
+    addToFavorites,
+    removeFavorite,
+    getCurrentPage,
+    showNotification,
+    
+    // Funções de API e debugging
+    testAPIConnection,
+    enableDebugMode,
+    displayAPIStatus,
+    getAPIStatus,
+    clearWeatherCache,
+    getCacheSize,
+    
+    // Configurações
+    config: API_CONFIG,
+    demoMode: DEMO_MODE,
+    rateLimit: RATE_LIMIT_CONFIG,
+    
+    // Estado atual
+    getCurrentWeather: () => currentWeatherData,
+    getCurrentCity: () => currentCity,
+    getFavorites: () => favoriteLocations,
+    
+    // Utilitários para controle de rate limit
+    canMakeRequest: () => checkRateLimit(),
+    getRemainingRequests: () => RATE_LIMIT_CONFIG.MAX_REQUESTS_PER_HOUR - RATE_LIMIT_CONFIG.REQUESTS_MADE,
+    
+// ===========================================
+// API GLOBAL PARA USO EM OUTRAS PÁGINAS (ATUALIZADA)
+// ===========================================
+
+window.weatherMonitor = {
+    // Funções principais
+    loadWeatherData,
+    loadWeatherAlerts,
+    addToFavorites,
+    removeFavorite,
+    getCurrentPage,
+    showNotification,
+    
+    // Funções de API e debugging
+    testAPIConnection,
+    enableDebugMode,
+    displayAPIStatus,
+    getAPIStatus,
+    clearWeatherCache,
+    getCacheSize,
+    
+    // Configurações
+    config: API_CONFIG,
+    demoMode: DEMO_MODE,
+    rateLimit: RATE_LIMIT_CONFIG,
+    
+    // Estado atual
+    getCurrentWeather: () => currentWeatherData,
+    getCurrentCity: () => currentCity,
+    getFavorites: () => favoriteLocations,
+    
+    // Utilitários para controle de rate limit
+    canMakeRequest: () => checkRateLimit(),
+    getRemainingRequests: () => RATE_LIMIT_CONFIG.MAX_REQUESTS_PER_HOUR - RATE_LIMIT_CONFIG.REQUESTS_MADE,
+    
+    // Função para mostrar aviso sobre rate limit
+    showRateLimitWarning: function() {
+        const status = getAPIStatus();
+        if (status.requestsRemaining <= 10) {
+            showNotification(
+                `⚠️ Atenção: Restam apenas ${status.requestsRemaining} requisições para a API. ` +
+                `Reset em: ${status.resetTime.toLocaleTimeString()}`,
+                'error'
+            );
+        } else if (status.requestsRemaining <= 25) {
+            showNotification(
+                `🔔 Aviso: ${status.requestsRemaining} requisições restantes para a API`,
+                'info'
+            );
+        }
+    }
+};
+
+console.log('🔌 Weather Monitor API disponível via window.weatherMonitor');
+
+// Log de inicialização final
+console.group('🌤️ Weather Monitor - Inicialização Completa');
+console.log('📄 Página atual:', getCurrentPage());
+console.log('🎭 Modo demonstração:', DEMO_MODE ? 'ATIVO' : 'INATIVO');
+console.log('🔑 Chave API:', API_CONFIG.KEY ? 'CONFIGURADA' : 'NÃO CONFIGURADA');
+
+const apiStatus = getAPIStatus();
+console.log('📊 Status da API:');
+console.log(`   - Requisições usadas: ${apiStatus.requestsUsed}/${apiStatus.maxRequests}`);
+console.log(`   - Requisições restantes: ${apiStatus.requestsRemaining}`);
+console.log(`   - Pode fazer requisições: ${apiStatus.canMakeRequest ? 'Sim' : 'Não'}`);
+console.log(`   - Cache atual: ${getCacheSize()}`);
+
+if (apiStatus.requestsRemaining <= 10 && !DEMO_MODE) {
+    console.warn('⚠️ ATENÇÃO: Poucas requisições restantes! Considere ativar DEMO_MODE = true');
+}
+
+console.groupEnd();
+
+// Auto-mostrar aviso se poucas requisições restantes
+if (!DEMO_MODE) {
+    setTimeout(() => {
+        const status = getAPIStatus();
+        if (status.requestsRemaining <= 20) {
+            showNotification(
+                `⚠️ Aviso: Restam ${status.requestsRemaining} requisições da API. ` +
+                `Considere ativar o modo demo para economizar requisições.`,
+                'info'
+            );
+        }
+    }, 2000);
+}
+
+// Ativar debug mode automaticamente se há poucos requests ou está em desenvolvimento
+if (!DEMO_MODE && (getAPIStatus().requestsRemaining <= 5 || window.location.hostname === 'localhost')) {
+    console.log('🔧 Ativando debug mode automaticamente...');
+    setTimeout(() => enableDebugMode(), 1000);
+}// ===========================================
 // WEATHER MONITOR - JAVASCRIPT CORRIGIDO
 // ===========================================
 
@@ -14,7 +141,25 @@ const FAVORITES_API = {
     BASE_URL: 'https://jsonplaceholder.typicode.com/posts',
 };
 
-const DEMO_MODE = false; // desativado
+const DEMO_MODE = false;
+
+// ===========================================
+// CONTROLE DE RATE LIMITING
+// ===========================================
+
+const RATE_LIMIT_CONFIG = {
+    MAX_REQUESTS_PER_HOUR: 100, // Limite da API gratuita
+    REQUESTS_MADE: parseInt(localStorage.getItem('weatherstack_requests') || '0'),
+    LAST_RESET: parseInt(localStorage.getItem('weatherstack_last_reset') || Date.now()),
+    RETRY_DELAY: 60000, // 1 minuto
+    MAX_RETRIES: 3
+};
+
+// Cache para evitar requisições desnecessárias
+const CACHE_CONFIG = {
+    EXPIRY_TIME: 10 * 60 * 1000, // 10 minutos
+    STORAGE_KEY: 'weatherstack_cache'
+};
 
 // ===========================================
 // ESTADO GLOBAL DA APLICAÇÃO
@@ -240,130 +385,240 @@ function setupManageEventListeners() {
 }
 
 // ===========================================
-// FUNÇÕES DA API - DADOS CLIMÁTICOS (CORRIGIDAS)
+// FUNÇÕES DE CACHE E RATE LIMITING
+// ===========================================
+
+function checkRateLimit() {
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000;
+    
+    // Reset contador se passou mais de 1 hora
+    if (now - RATE_LIMIT_CONFIG.LAST_RESET > oneHour) {
+        RATE_LIMIT_CONFIG.REQUESTS_MADE = 0;
+        RATE_LIMIT_CONFIG.LAST_RESET = now;
+        localStorage.setItem('weatherstack_requests', '0');
+        localStorage.setItem('weatherstack_last_reset', now.toString());
+    }
+    
+    return RATE_LIMIT_CONFIG.REQUESTS_MADE < RATE_LIMIT_CONFIG.MAX_REQUESTS_PER_HOUR;
+}
+
+function incrementRequestCount() {
+    RATE_LIMIT_CONFIG.REQUESTS_MADE++;
+    localStorage.setItem('weatherstack_requests', RATE_LIMIT_CONFIG.REQUESTS_MADE.toString());
+}
+
+function getCachedData(cacheKey) {
+    try {
+        const cache = JSON.parse(localStorage.getItem(CACHE_CONFIG.STORAGE_KEY) || '{}');
+        const cachedItem = cache[cacheKey];
+        
+        if (cachedItem && Date.now() - cachedItem.timestamp < CACHE_CONFIG.EXPIRY_TIME) {
+            console.log('📦 Usando dados em cache para:', cacheKey);
+            return cachedItem.data;
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Erro ao ler cache:', error);
+        return null;
+    }
+}
+
+function setCachedData(cacheKey, data) {
+    try {
+        const cache = JSON.parse(localStorage.getItem(CACHE_CONFIG.STORAGE_KEY) || '{}');
+        cache[cacheKey] = {
+            data: data,
+            timestamp: Date.now()
+        };
+        
+        localStorage.setItem(CACHE_CONFIG.STORAGE_KEY, JSON.stringify(cache));
+        console.log('💾 Dados salvos em cache para:', cacheKey);
+    } catch (error) {
+        console.error('Erro ao salvar cache:', error);
+    }
+}
+
+async function makeAPIRequest(url, cacheKey, retryCount = 0) {
+    // Verificar cache primeiro
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+        return cachedData;
+    }
+    
+    // Verificar rate limit
+    if (!checkRateLimit()) {
+        console.warn('⚠️ Rate limit excedido, usando dados simulados');
+        throw new Error('RATE_LIMIT_EXCEEDED');
+    }
+    
+    try {
+        incrementRequestCount();
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'User-Agent': 'WeatherMonitor/1.0'
+            },
+            signal: AbortSignal.timeout(10000)
+        });
+        
+        // Tratamento específico para erro 429
+        if (response.status === 429) {
+            console.error('❌ Rate limit da API excedido (429)');
+            
+            // Aguardar antes de retry se não excedeu max retries
+            if (retryCount < RATE_LIMIT_CONFIG.MAX_RETRIES) {
+                showNotification(
+                    `Rate limit excedido. Tentando novamente em ${RATE_LIMIT_CONFIG.RETRY_DELAY / 1000}s...`,
+                    'info'
+                );
+                
+                await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_CONFIG.RETRY_DELAY));
+                return makeAPIRequest(url, cacheKey, retryCount + 1);
+            }
+            
+            throw new Error('RATE_LIMIT_EXCEEDED');
+        }
+        
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            // Tratar diferentes tipos de erro da API
+            if (data.error.code === 104) { // Monthly usage limit
+                throw new Error('MONTHLY_LIMIT_EXCEEDED');
+            } else if (data.error.code === 105) { // Invalid API key
+                throw new Error('INVALID_API_KEY');
+            } else {
+                throw new Error(`API Error: ${data.error.info || 'Erro desconhecido da API'}`);
+            }
+        }
+        
+        if (!data.current && !data.forecast) {
+            throw new Error('Dados inválidos retornados pela API');
+        }
+        
+        // Salvar no cache
+        setCachedData(cacheKey, data);
+        
+        return data;
+        
+    } catch (error) {
+        if (error.message === 'RATE_LIMIT_EXCEEDED' || error.message === 'MONTHLY_LIMIT_EXCEEDED') {
+            throw error;
+        }
+        
+        // Outros erros, tentar retry se disponível
+        if (retryCount < RATE_LIMIT_CONFIG.MAX_RETRIES && 
+            (error.name === 'AbortError' || error.message.includes('NetworkError'))) {
+            
+            console.log(`🔄 Tentativa ${retryCount + 1}/${RATE_LIMIT_CONFIG.MAX_RETRIES}`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return makeAPIRequest(url, cacheKey, retryCount + 1);
+        }
+        
+        throw error;
+    }
+}
+
+// ===========================================
+// FUNÇÕES DA API - DADOS CLIMÁTICOS (COM TRATAMENTO 429)
 // ===========================================
 
 async function loadWeatherData(city) {
-    console.log('Carregando dados climáticos para:', city);
+    console.log('🌤️ Carregando dados climáticos para:', city);
     showLoading('weather');
     
     try {
         let data;
         
         if (DEMO_MODE) {
-            console.log('Usando modo demo');
+            console.log('🎭 Usando modo demo');
             data = await simulateCurrentWeatherData(city);
         } else {
-            console.log('Fazendo requisição para API real');
+            console.log('🌐 Tentando API real');
             
-            // Construir URL corretamente
             const url = new URL(API_CONFIG.BASE_URL);
             url.searchParams.append('access_key', API_CONFIG.KEY);
             url.searchParams.append('query', city);
             url.searchParams.append('units', 'm');
             
-            console.log('URL da requisição:', url.toString());
+            const cacheKey = `current_${city.toLowerCase()}`;
             
-            const response = await fetch(url.toString(), {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'User-Agent': 'WeatherMonitor/1.0'
-                },
-                // Adicionar timeout
-                signal: AbortSignal.timeout(10000) // 10 segundos
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
-            }
-            
-            data = await response.json();
-            
-            // Verificar se a API retornou erro
-            if (data.error) {
-                throw new Error(`API Error: ${data.error.info || 'Erro desconhecido da API'}`);
-            }
-
-            // Verificar se há dados válidos
-            if (!data.current) {
-                throw new Error('Dados inválidos retornados pela API');
+            try {
+                data = await makeAPIRequest(url.toString(), cacheKey);
+                showNotification('✅ Dados carregados da API', 'success');
+            } catch (apiError) {
+                console.warn('⚠️ Erro na API, usando dados simulados:', apiError.message);
+                
+                if (apiError.message === 'RATE_LIMIT_EXCEEDED') {
+                    showNotification(
+                        '⏰ Limite de requisições excedido. Usando dados simulados. ' +
+                        `Restam ${RATE_LIMIT_CONFIG.MAX_REQUESTS_PER_HOUR - RATE_LIMIT_CONFIG.REQUESTS_MADE} requisições`,
+                        'error'
+                    );
+                } else if (apiError.message === 'MONTHLY_LIMIT_EXCEEDED') {
+                    showNotification('📅 Limite mensal da API excedido. Usando dados simulados', 'error');
+                } else if (apiError.message === 'INVALID_API_KEY') {
+                    showNotification('🔑 Chave da API inválida. Usando dados simulados', 'error');
+                } else {
+                    showNotification('🌐 Erro na API. Usando dados simulados', 'info');
+                }
+                
+                data = await simulateCurrentWeatherData(city);
             }
         }
 
         currentWeatherData = data;
         displayWeatherData(data);
-        console.log('Dados climáticos carregados com sucesso');
+        console.log('✅ Dados climáticos carregados com sucesso');
         
     } catch (error) {
-        console.error('Erro ao carregar dados climáticos:', error);
-        
-        // Diferentes tipos de erro
-        if (error.name === 'AbortError') {
-            showError('weather', 'Timeout - A requisição demorou muito para responder');
-        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-            showError('weather', 'Erro de conexão - Verifique sua internet');
-        } else if (error.message.includes('API Error')) {
-            showError('weather', error.message);
-        } else {
-            showError('weather', `Erro: ${error.message}`);
-        }
-        
-        // Tentar usar dados simulados como fallback
-        if (!DEMO_MODE) {
-            console.log('Tentando usar dados simulados como fallback...');
-            try {
-                const fallbackData = await simulateCurrentWeatherData(city);
-                currentWeatherData = fallbackData;
-                displayWeatherData(fallbackData);
-                showNotification('Usando dados simulados devido ao erro na API', 'info');
-            } catch (fallbackError) {
-                console.error('Erro no fallback:', fallbackError);
-            }
-        }
+        console.error('❌ Erro crítico ao carregar dados climáticos:', error);
+        showError('weather', `Erro inesperado: ${error.message}`);
     }
 }
 
 async function loadForecast(city) {
-    console.log('Carregando previsão para:', city);
+    console.log('📅 Carregando previsão para:', city);
     showLoading('forecast');
     
     try {
         let data;
         
         if (DEMO_MODE) {
+            console.log('🎭 Usando modo demo para previsão');
             data = await simulateForecastData(city);
         } else {
-            // Construir URL corretamente
+            console.log('🌐 Tentando API real para previsão');
+            
             const url = new URL(API_CONFIG.FORECAST_URL);
             url.searchParams.append('access_key', API_CONFIG.KEY);
             url.searchParams.append('query', city);
             url.searchParams.append('forecast_days', '7');
             url.searchParams.append('units', 'm');
             
-            console.log('URL da previsão:', url.toString());
+            const cacheKey = `forecast_${city.toLowerCase()}`;
             
-            const response = await fetch(url.toString(), {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'User-Agent': 'WeatherMonitor/1.0'
-                },
-                signal: AbortSignal.timeout(15000) // 15 segundos para previsão
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
-            }
-            
-            data = await response.json();
-            
-            if (data.error) {
-                throw new Error(`API Error: ${data.error.info || 'Erro desconhecido da API'}`);
-            }
-
-            if (!data.forecast) {
-                throw new Error('Dados de previsão inválidos');
+            try {
+                data = await makeAPIRequest(url.toString(), cacheKey);
+                showNotification('✅ Previsão carregada da API', 'success');
+            } catch (apiError) {
+                console.warn('⚠️ Erro na API de previsão, usando dados simulados:', apiError.message);
+                
+                if (apiError.message === 'RATE_LIMIT_EXCEEDED') {
+                    showNotification('⏰ Limite de requisições excedido para previsão', 'error');
+                } else {
+                    showNotification('🌐 Erro na API de previsão. Usando dados simulados', 'info');
+                }
+                
+                data = await simulateForecastData(city);
             }
         }
 
@@ -373,38 +628,22 @@ async function loadForecast(city) {
         displayWeeklySummary(data.forecast);
         
     } catch (error) {
-        console.error('Erro ao carregar previsão:', error);
-        
-        if (error.name === 'AbortError') {
-            showError('forecast', 'Timeout - A requisição demorou muito para responder');
-        } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-            showError('forecast', 'Erro de conexão - Verifique sua internet');
-        } else {
-            showError('forecast', error.message);
-        }
-        
-        // Fallback para dados simulados
-        if (!DEMO_MODE) {
-            try {
-                const fallbackData = await simulateForecastData(city);
-                forecastData = fallbackData.forecast;
-                displayForecastData(fallbackData);
-                createPrecipitationChart(fallbackData.forecast);
-                displayWeeklySummary(fallbackData.forecast);
-                showNotification('Usando dados simulados devido ao erro na API', 'info');
-            } catch (fallbackError) {
-                console.error('Erro no fallback da previsão:', fallbackError);
-            }
-        }
+        console.error('❌ Erro crítico ao carregar previsão:', error);
+        showError('forecast', `Erro inesperado: ${error.message}`);
     }
 }
 
 // ===========================================
-// FUNÇÃO PARA TESTAR CONECTIVIDADE DA API
+// FUNÇÃO PARA TESTAR CONECTIVIDADE DA API (ATUALIZADA)
 // ===========================================
 
 async function testAPIConnection() {
     try {
+        if (!checkRateLimit()) {
+            console.warn('⚠️ Rate limit excedido - não testando API');
+            return false;
+        }
+
         const url = new URL(API_CONFIG.BASE_URL);
         url.searchParams.append('access_key', API_CONFIG.KEY);
         url.searchParams.append('query', 'London');
@@ -415,19 +654,86 @@ async function testAPIConnection() {
             signal: AbortSignal.timeout(5000)
         });
         
-        const data = await response.json();
-        
-        if (data.error) {
-            console.error('Erro na API:', data.error);
+        if (response.status === 429) {
+            console.warn('⚠️ API com rate limit (429)');
             return false;
         }
         
-        console.log('API funcionando corretamente');
+        const data = await response.json();
+        
+        if (data.error) {
+            console.error('❌ Erro na API:', data.error);
+            return false;
+        }
+        
+        console.log('✅ API funcionando corretamente');
+        incrementRequestCount();
         return true;
         
     } catch (error) {
-        console.error('Teste de API falhou:', error);
+        console.error('❌ Teste de API falhou:', error);
         return false;
+    }
+}
+
+// ===========================================
+// FUNÇÃO PARA MONITORAR STATUS DA API
+// ===========================================
+
+function getAPIStatus() {
+    const remainingRequests = RATE_LIMIT_CONFIG.MAX_REQUESTS_PER_HOUR - RATE_LIMIT_CONFIG.REQUESTS_MADE;
+    const resetTime = new Date(RATE_LIMIT_CONFIG.LAST_RESET + 60 * 60 * 1000);
+    
+    return {
+        requestsUsed: RATE_LIMIT_CONFIG.REQUESTS_MADE,
+        requestsRemaining: remainingRequests,
+        maxRequests: RATE_LIMIT_CONFIG.MAX_REQUESTS_PER_HOUR,
+        resetTime: resetTime,
+        canMakeRequest: remainingRequests > 0,
+        demoMode: DEMO_MODE
+    };
+}
+
+function displayAPIStatus() {
+    const status = getAPIStatus();
+    
+    console.group('📊 Status da API Weatherstack');
+    console.log(`🔢 Requisições usadas: ${status.requestsUsed}/${status.maxRequests}`);
+    console.log(`⏳ Requisições restantes: ${status.requestsRemaining}`);
+    console.log(`🔄 Reset em: ${status.resetTime.toLocaleTimeString()}`);
+    console.log(`✅ Pode fazer requisição: ${status.canMakeRequest ? 'Sim' : 'Não'}`);
+    console.log(`🎭 Modo demo: ${status.demoMode ? 'Ativo' : 'Inativo'}`);
+    console.groupEnd();
+    
+    return status;
+}
+
+// ===========================================
+// FUNÇÃO PARA LIMPAR CACHE
+// ===========================================
+
+function clearWeatherCache() {
+    try {
+        localStorage.removeItem(CACHE_CONFIG.STORAGE_KEY);
+        console.log('🗑️ Cache limpo com sucesso');
+        showNotification('Cache de dados meteorológicos limpo!', 'success');
+    } catch (error) {
+        console.error('❌ Erro ao limpar cache:', error);
+        showNotification('Erro ao limpar cache', 'error');
+    }
+}
+
+function getCacheSize() {
+    try {
+        const cache = localStorage.getItem(CACHE_CONFIG.STORAGE_KEY);
+        if (cache) {
+            const sizeInBytes = new Blob([cache]).size;
+            const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+            return `${sizeInKB} KB`;
+        }
+        return '0 KB';
+    } catch (error) {
+        return 'Erro';
     }
 }
 
@@ -1463,19 +1769,35 @@ function checkURLParams() {
 }
 
 // ===========================================
-// FUNÇÕES DE DEBUG E MONITORAMENTO
+// FUNÇÕES DE DEBUG E MONITORAMENTO (ATUALIZADAS)
 // ===========================================
 
 function enableDebugMode() {
     console.log('🔧 Debug Mode Ativado');
     
+    // Mostrar status da API
+    displayAPIStatus();
+    
     // Log todas as requisições
     const originalFetch = window.fetch;
     window.fetch = function(...args) {
         console.log('🌐 Fetch Request:', args[0]);
+        
+        // Detectar se é para Weatherstack
+        if (args[0].includes('weatherstack.com')) {
+            const status = getAPIStatus();
+            if (!status.canMakeRequest) {
+                console.warn('⚠️ AVISO: Rate limit pode ter sido excedido!');
+            }
+        }
+        
         return originalFetch.apply(this, args)
             .then(response => {
-                console.log('✅ Fetch Response:', response.status, response.statusText);
+                if (response.status === 429) {
+                    console.error('❌ Rate Limit (429) detectado!');
+                } else {
+                    console.log('✅ Fetch Response:', response.status, response.statusText);
+                }
                 return response;
             })
             .catch(error => {
@@ -1484,11 +1806,14 @@ function enableDebugMode() {
             });
     };
     
+    // Adicionar botões de debug ao DOM
+    addDebugButtons();
+    
     // Monitorar mudanças no DOM
     const observer = new MutationObserver(mutations => {
         mutations.forEach(mutation => {
-            if (mutation.type === 'childList') {
-                console.log('🔄 DOM Changed:', mutation.target);
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                console.log('🔄 DOM Changed:', mutation.target.tagName || mutation.target);
             }
         });
     });
@@ -1499,6 +1824,50 @@ function enableDebugMode() {
     testAPIConnection().then(isWorking => {
         console.log(`🌡️ API Status: ${isWorking ? 'FUNCIONANDO' : 'COM PROBLEMAS'}`);
     });
+}
+
+function addDebugButtons() {
+    // Criar painel de debug
+    const debugPanel = document.createElement('div');
+    debugPanel.id = 'debug-panel';
+    debugPanel.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        z-index: 9999;
+        font-family: monospace;
+        font-size: 12px;
+        min-width: 250px;
+        max-height: 300px;
+        overflow-y: auto;
+    `;
+    
+    const status = getAPIStatus();
+    
+    debugPanel.innerHTML = `
+        <div style="margin-bottom: 10px;">
+            <strong>🔧 Debug Panel</strong>
+            <button onclick="this.parentElement.parentElement.remove()" style="float: right; background: red; border: none; color: white; padding: 2px 8px; border-radius: 3px; cursor: pointer;">✕</button>
+        </div>
+        <div>📊 Requisições: ${status.requestsUsed}/${status.maxRequests}</div>
+        <div>⏳ Restantes: ${status.requestsRemaining}</div>
+        <div>🎭 Demo Mode: ${DEMO_MODE ? 'ON' : 'OFF'}</div>
+        <div>💾 Cache: ${getCacheSize()}</div>
+        <div style="margin-top: 10px;">
+            <button onclick="displayAPIStatus()" style="background: #3498db; border: none; color: white; padding: 5px 10px; margin: 2px; border-radius: 3px; cursor: pointer; font-size: 11px;">Status</button>
+            <button onclick="clearWeatherCache()" style="background: #e74c3c; border: none; color: white; padding: 5px 10px; margin: 2px; border-radius: 3px; cursor: pointer; font-size: 11px;">Clear Cache</button>
+            <button onclick="testAPIConnection().then(r => console.log('API Test:', r))" style="background: #27ae60; border: none; color: white; padding: 5px 10px; margin: 2px; border-radius: 3px; cursor: pointer; font-size: 11px;">Test API</button>
+        </div>
+        <div style="margin-top: 10px; font-size: 10px; opacity: 0.7;">
+            Reset: ${status.resetTime.toLocaleTimeString()}
+        </div>
+    `;
+    
+    document.body.appendChild(debugPanel);
 }
 
 // Executar checagem de parâmetros após inicialização
