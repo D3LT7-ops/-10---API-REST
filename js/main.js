@@ -14,7 +14,7 @@ const FAVORITES_API = {
     BASE_URL: 'https://jsonplaceholder.typicode.com/posts',
 };
 
-const DEMO_MODE = true; // Ativado por padrão para evitar problemas de API
+const DEMO_MODE = false; // desativado
 
 // ===========================================
 // ESTADO GLOBAL DA APLICAÇÃO
