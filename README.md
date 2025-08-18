@@ -27,16 +27,27 @@ WeatherStack API (http://weatherstack.com/)
 
 ## Tabela de Requisições por Página
 
-| Página         | Tipo de Requisição| Endpoint                                                                         | Descrição |
-|----------------|-------------------|----------------------------------------------------------------------------------|
-| index.html     | GET               | `https://api.weatherstack.com/current?access_key={API_KEY}&query={city}&units=m` | Buscar dados meteorológicos **reais** da cidade |
-| index.html     | POST              | `/favorites` (simulado localmente).                                              | Adicionar cidade aos favoritos |
-| favorites.html | GET               | `/favorites` (simulado localmente)                                               | Listar cidades favoritas |
-| favorites.html | DELETE            | `/favorites/{id}` (simulado localmente)                                          |Remover cidade dos favoritos |
-| history.html   | GET               | `/history` (simulado localmente)                                                 | Exibir histórico de pesquisas |
+### Descrição  
+#### Buscar dados meteorológicos **reais** da cidade
+**index.html -- get -- `https://api.weatherstack.com/current?access_key={API_KEY}&query={city}&units=`**
+### Descrição  
+#### Adicionar cidade aos favoritos 
+**index.html index.html -- post -- `/favorites`**
+### Descrição  
+#### Listar cidades favoritas 
+**favorites.html -- GET--`/favorites`**    
+### Descrição  
+#### Remover cidade dos favoritos 
+**favorites.html --DELETE-- `/favorites/{id}`**
+
+### descriçao 
+#### exibir historico de pesquisas
+**history.html   --GET--  `/history` (simulado localmente)**
+
 
 
 ## **Limitações da API Gratuita:**
+   - numero limitados de uso da api de graca = 100 buscas por mes 
    - Plan gratuito: 1.000 requisições/mês
    - Apenas requisições GET (não POST/PUT/DELETE)
    - Por isso favoritos/histórico são simulados localmente
