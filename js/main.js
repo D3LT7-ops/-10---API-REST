@@ -70,12 +70,9 @@ async function searchWeather() {
     }
 }
 
-// Simulação da chamada da API (GET request)
 async function fetchWeatherData(city) {
-    // Simulando dados da API WeatherStack já que precisamos de uma chave real
-    // Em um projeto real, você faria:
-    // const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${city}&units=m`);
-    // const data = await response.json();
+    const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${city}&units=m`);
+     const data = await response.json();
     
     // Simulação com dados fictícios para demonstração
     const mockData = {
@@ -207,7 +204,7 @@ function displayFavorites() {
         <div class="favorite-item">
             <div class="favorite-header">
                 <h4>${fav.city}, ${fav.country}</h4>
-                <button class="delete-btn" onclick="removeFromFavorites(${fav.id})">🗑️ Remover</button>
+                <button class="delete-btn" onclick="removeFromFavorites(${fav.id})"> Remover</button>
             </div>
             <div class="favorite-temp">${fav.temperature}°C</div>
             <div class="favorite-desc">${fav.description}</div>
@@ -283,8 +280,7 @@ function hideWeatherCard() {
     if (weatherCard) weatherCard.classList.add('hidden');
 }
 
-// Exemplo de como você faria uma requisição real à API WeatherStack:
-/*
+
 async function fetchRealWeatherData(city) {
     try {
         const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${city}&units=m`);
@@ -305,4 +301,3 @@ async function fetchRealWeatherData(city) {
         throw error;
     }
 }
-*/
