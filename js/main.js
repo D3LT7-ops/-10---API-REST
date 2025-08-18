@@ -1,7 +1,7 @@
 // js/main.js
 
 // Configuração da API WeatherStack
-const API_KEY = '99a15dbcafb7db271f431e7751086382'; // Substitua pela sua chave real
+const API_KEY = 'da3d27a38ae49485bf935291b2ab5732'; // Substitua pela sua chave real
 const BASE_URL = 'https://api.weatherstack.com/current';
 
 // Armazenamento local simulado
