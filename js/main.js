@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadPageContent();
 });
 
-// Função principal para buscar dados do tempo
+// Função principal para buscar dados do tempo (sobrescrevendo a anterior)
 async function searchWeather() {
     const city = cityInput?.value.trim();
     
@@ -49,12 +49,16 @@ async function searchWeather() {
         return;
     }
 
+    // Validar API Key antes de fazer a requisição
+    if (!validateApiKey()) {
+        return;
+    }
+
     showLoading();
     hideError();
     hideWeatherCard();
 
     try {
-        // Simulação de requisição GET para WeatherStack API
         const weatherData = await fetchWeatherData(city);
         
         if (weatherData) {
@@ -63,44 +67,63 @@ async function searchWeather() {
             currentWeatherData = weatherData;
         }
     } catch (err) {
-        showError('Erro ao buscar dados meteorológicos. Tente novamente.');
+        showError(err.message || 'Erro ao buscar dados meteorológicos. Tente novamente.');
         console.error('Erro na API:', err);
     } finally {
         hideLoading();
     }
 }
 
+// Função para buscar dados reais da API WeatherStack
 async function fetchWeatherData(city) {
-    const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${city}&units=m`);
-     const data = await response.json();
-    
-    // Simulação com dados fictícios para demonstração
-    const mockData = {
-        location: {
-            name: city.charAt(0).toUpperCase() + city.slice(1).toLowerCase(),
-            country: 'Brasil',
-            localtime: new Date().toLocaleString('pt-BR')
-        },
-        current: {
-            temperature: Math.floor(Math.random() * 30) + 5, // 5-35°C
-            weather_descriptions: ['Ensolarado', 'Parcialmente nublado', 'Nublado', 'Chuva leve'][Math.floor(Math.random() * 4)],
-            weather_icons: ['https://cdn.weatherapi.com/weather/64x64/day/113.png'],
-            feelslike: Math.floor(Math.random() * 30) + 8,
-            humidity: Math.floor(Math.random() * 70) + 30,
-            wind_speed: Math.floor(Math.random() * 25) + 5,
-            wind_dir: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.floor(Math.random() * 8)],
-            pressure: Math.floor(Math.random() * 100) + 1000,
-            visibility: Math.floor(Math.random() * 15) + 5
-        }
-    };
+    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+        throw new Error('Por favor, configure sua chave da API no arquivo main.js');
+    }
 
-    // Simular delay de rede
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return mockData;
+    try {
+        const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${encodeURIComponent(city)}&units=m`);
+        
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Verificar se há erro na resposta da API
+        if (data.error) {
+            throw new Error(data.error.info || 'Erro desconhecido da API');
+        }
+        
+        // Verificar se os dados necessários estão presentes
+        if (!data.current || !data.location) {
+            throw new Error('Dados incompletos recebidos da API');
+        }
+        
+        return data;
+        
+    } catch (error) {
+        console.error('Erro ao buscar dados da API:', error);
+        
+        // Se for erro de rede ou API indisponível, mostrar mensagem específica
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            throw new Error('Erro de conexão. Verifique sua internet e tente novamente.');
+        }
+        
+        // Se for erro da API key
+        if (error.message.includes('API key') || error.message.includes('access_key')) {
+            throw new Error('Chave da API inválida. Verifique sua configuração.');
+        }
+        
+        // Se a cidade não foi encontrada
+        if (error.message.includes('location') || error.message.includes('query')) {
+            throw new Error('Cidade não encontrada. Tente outro nome.');
+        }
+        
+        throw error;
+    }
 }
 
-// Exibir dados meteorológicos
+// Exibir dados meteorológicos reais da API
 function displayWeatherData(data) {
     if (!weatherCard) return;
 
@@ -116,20 +139,21 @@ function displayWeatherData(data) {
     const pressure = document.getElementById('pressure');
     const visibility = document.getElementById('visibility');
 
+    // Usar dados reais da API
     if (cityName) cityName.textContent = `${data.location.name}, ${data.location.country}`;
-    if (currentTime) currentTime.textContent = `Última atualização: ${data.location.localtime}`;
-    if (weatherIcon) {
+    if (currentTime) currentTime.textContent = `Atualizado: ${data.location.localtime}`;
+    if (weatherIcon && data.current.weather_icons && data.current.weather_icons.length > 0) {
         weatherIcon.src = data.current.weather_icons[0];
-        weatherIcon.alt = data.current.weather_descriptions[0];
+        weatherIcon.alt = data.current.weather_descriptions[0] || 'Ícone do tempo';
     }
-    if (temperature) temperature.textContent = data.current.temperature;
-    if (description) description.textContent = data.current.weather_descriptions[0];
-    if (feelsLike) feelsLike.textContent = data.current.feelslike;
-    if (humidity) humidity.textContent = data.current.humidity;
-    if (windSpeed) windSpeed.textContent = data.current.wind_speed;
-    if (windDir) windDir.textContent = data.current.wind_dir;
-    if (pressure) pressure.textContent = data.current.pressure;
-    if (visibility) visibility.textContent = data.current.visibility;
+    if (temperature) temperature.textContent = data.current.temperature || 'N/A';
+    if (description) description.textContent = data.current.weather_descriptions[0] || 'Não disponível';
+    if (feelsLike) feelsLike.textContent = data.current.feelslike || 'N/A';
+    if (humidity) humidity.textContent = data.current.humidity || 'N/A';
+    if (windSpeed) windSpeed.textContent = data.current.wind_speed || 'N/A';
+    if (windDir) windDir.textContent = data.current.wind_dir || 'N/A';
+    if (pressure) pressure.textContent = data.current.pressure || 'N/A';
+    if (visibility) visibility.textContent = data.current.visibility || 'N/A';
 
     showWeatherCard();
 }
@@ -143,8 +167,8 @@ function addToFavorites() {
         city: currentWeatherData.location.name,
         country: currentWeatherData.location.country,
         temperature: currentWeatherData.current.temperature,
-        description: currentWeatherData.current.weather_descriptions[0],
-        icon: currentWeatherData.current.weather_icons[0],
+        description: currentWeatherData.current.weather_descriptions[0] || 'Não disponível',
+        icon: currentWeatherData.current.weather_icons[0] || '',
         addedAt: new Date().toLocaleString('pt-BR')
     };
 
@@ -177,7 +201,7 @@ function addToHistory(data) {
         city: data.location.name,
         country: data.location.country,
         temperature: data.current.temperature,
-        description: data.current.weather_descriptions[0],
+        description: data.current.weather_descriptions[0] || 'Não disponível',
         searchedAt: new Date().toLocaleString('pt-BR')
     };
 
@@ -204,7 +228,7 @@ function displayFavorites() {
         <div class="favorite-item">
             <div class="favorite-header">
                 <h4>${fav.city}, ${fav.country}</h4>
-                <button class="delete-btn" onclick="removeFromFavorites(${fav.id})"> Remover</button>
+                <button class="delete-btn" onclick="removeFromFavorites(${fav.id})">🗑️ Remover</button>
             </div>
             <div class="favorite-temp">${fav.temperature}°C</div>
             <div class="favorite-desc">${fav.description}</div>
@@ -280,24 +304,45 @@ function hideWeatherCard() {
     if (weatherCard) weatherCard.classList.add('hidden');
 }
 
+// Função para validar se a API Key está configurada
+function validateApiKey() {
+    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+        showError('⚠️ Para usar dados reais, configure sua chave da API WeatherStack no arquivo main.js');
+        return false;
+    }
+    return true;
+}
 
-async function fetchRealWeatherData(city) {
+// Adicionar validação na função de busca
+async function searchWeather() {
+    const city = cityInput?.value.trim();
+    
+    if (!city) {
+        showError('Por favor, digite o nome de uma cidade.');
+        return;
+    }
+
+    // Validar API Key antes de fazer a requisição
+    if (!validateApiKey()) {
+        return;
+    }
+
+    showLoading();
+    hideError();
+    hideWeatherCard();
+
     try {
-        const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${city}&units=m`);
+        const weatherData = await fetchWeatherData(city);
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (weatherData) {
+            displayWeatherData(weatherData);
+            addToHistory(weatherData);
+            currentWeatherData = weatherData;
         }
-        
-        const data = await response.json();
-        
-        if (data.error) {
-            throw new Error(data.error.info);
-        }
-        
-        return data;
-    } catch (error) {
-        console.error('Erro ao buscar dados da API:', error);
-        throw error;
+    } catch (err) {
+        showError(err.message || 'Erro ao buscar dados meteorológicos. Tente novamente.');
+        console.error('Erro na API:', err);
+    } finally {
+        hideLoading();
     }
 }
