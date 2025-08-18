@@ -1,14 +1,12 @@
 // js/main.js
 
 // Configuração da API WeatherStack
-const API_KEY = '99a15dbcafb7db271f431e7751086382'; // Substitua pela sua chave da API
+const API_KEY = '99a15dbcafb7db271f431e7751086382'; // Substitua pela sua chave real
 const BASE_URL = 'https://api.weatherstack.com/current';
 
-// Simulação de armazenamento local
+// Armazenamento local simulado
 let favorites = [];
 let searchHistory = [];
-
-// Cache de resultados
 let weatherCache = {};
 
 // Debounce
@@ -24,26 +22,20 @@ const weatherCard = document.getElementById('weatherCard');
 const addFavoriteBtn = document.getElementById('addFavoriteBtn');
 
 let currentWeatherData = null;
+let lastCity = '';
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     if (searchBtn) searchBtn.addEventListener('click', searchWeatherDebounced);
-
-    if (cityInput) {
-        cityInput.addEventListener('input', searchWeatherDebounced);
-    }
-
+    if (cityInput) cityInput.addEventListener('input', searchWeatherDebounced);
     if (addFavoriteBtn) addFavoriteBtn.addEventListener('click', addToFavorites);
-
     loadPageContent();
 });
 
 // Função debounce
 function searchWeatherDebounced() {
     clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => {
-        searchWeather();
-    }, DEBOUNCE_DELAY);
+    debounceTimeout = setTimeout(() => searchWeather(), DEBOUNCE_DELAY);
 }
 
 // Função principal de busca
@@ -56,17 +48,18 @@ async function searchWeather() {
 
     if (!validateApiKey()) return;
 
+    if (city.toLowerCase() === lastCity.toLowerCase()) return; // Bloqueia busca repetida
+    lastCity = city;
+
     showLoading();
     hideError();
     hideWeatherCard();
 
     try {
         const weatherData = await fetchWeatherData(city);
-        if (weatherData) {
-            displayWeatherData(weatherData);
-            addToHistory(weatherData);
-            currentWeatherData = weatherData;
-        }
+        displayWeatherData(weatherData);
+        addToHistory(weatherData);
+        currentWeatherData = weatherData;
     } catch (err) {
         showError(err.message || 'Erro ao buscar dados meteorológicos.');
         console.error('Erro na API:', err);
@@ -75,51 +68,25 @@ async function searchWeather() {
     }
 }
 
-// Função para buscar dados da API ou usar mock/cache
+// Buscar dados da API com cache
 async function fetchWeatherData(city) {
-    // Retorna do cache se disponível
     if (weatherCache[city]) return weatherCache[city];
 
-    // Tenta buscar da API real
-    if (API_KEY && API_KEY !== 'YOUR_API_KEY_HERE') {
-        try {
-            const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${encodeURIComponent(city)}&units=m`);
-            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.info);
+    try {
+        const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${encodeURIComponent(city)}&units=m`);
+        if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
-            weatherCache[city] = data;
-            return data;
-        } catch (err) {
-            console.warn('Falha na API, usando dados simulados:', err.message);
-        }
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.info);
+
+        weatherCache[city] = data; // Armazena no cache
+        return data;
+    } catch (err) {
+        throw new Error(`Falha ao buscar dados da API: ${err.message}`);
     }
-
-    // Se falhar ou limite da API, retorna mock
-    const mockData = {
-        location: {
-            name: city,
-            country: 'País Desconhecido',
-            localtime: new Date().toLocaleString()
-        },
-        current: {
-            temperature: Math.floor(Math.random() * 30) + 10,
-            weather_descriptions: ['Parcialmente nublado'],
-            weather_icons: ['https://via.placeholder.com/64'],
-            feelslike: Math.floor(Math.random() * 30) + 10,
-            humidity: Math.floor(Math.random() * 100),
-            wind_speed: Math.floor(Math.random() * 20),
-            wind_dir: 'N',
-            pressure: 1013,
-            visibility: 10
-        }
-    };
-
-    weatherCache[city] = mockData;
-    return mockData;
 }
 
-// Exibir dados
+// Exibir dados do tempo
 function displayWeatherData(data) {
     if (!weatherCard) return;
 
@@ -137,7 +104,7 @@ function displayWeatherData(data) {
 
     if (cityName) cityName.textContent = `${data.location.name}, ${data.location.country}`;
     if (currentTime) currentTime.textContent = `Atualizado: ${data.location.localtime}`;
-    if (weatherIcon && data.current.weather_icons) {
+    if (weatherIcon && data.current.weather_icons && data.current.weather_icons.length > 0) {
         weatherIcon.src = data.current.weather_icons[0];
         weatherIcon.alt = data.current.weather_descriptions[0] || 'Ícone do tempo';
     }
@@ -197,6 +164,7 @@ function addToHistory(data) {
     displayHistory();
 }
 
+// Exibir favoritos e histórico
 function displayFavorites() {
     const favoritesList = document.getElementById('favoritesList');
     if (!favoritesList) return;
@@ -240,6 +208,7 @@ function displayHistory() {
     `).join('');
 }
 
+// Carregar conteúdo específico da página
 function loadPageContent() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     if (currentPage === 'favorites.html') displayFavorites();
