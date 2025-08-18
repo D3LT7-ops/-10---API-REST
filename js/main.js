@@ -8,6 +8,12 @@ const BASE_URL = 'https://api.weatherstack.com/current';
 let favorites = [];
 let searchHistory = [];
 
+// Cache simples para reduzir chamadas repetidas
+let weatherCache = {};
+let lastCity = '';
+let lastSearchTime = 0;
+const SEARCH_DELAY = 1500; // 1.5 segundos entre buscas
+
 // Elementos DOM
 const cityInput = document.getElementById('cityInput');
 const searchBtn = document.getElementById('searchBtn');
@@ -20,39 +26,44 @@ let currentWeatherData = null;
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    if (searchBtn) {
-        searchBtn.addEventListener('click', searchWeather);
-    }
+    if (searchBtn) searchBtn.addEventListener('click', searchWeather);
     
     if (cityInput) {
         cityInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchWeather();
-            }
+            if (e.key === 'Enter') searchWeather();
         });
     }
     
-    if (addFavoriteBtn) {
-        addFavoriteBtn.addEventListener('click', addToFavorites);
-    }
+    if (addFavoriteBtn) addFavoriteBtn.addEventListener('click', addToFavorites);
 
     // Carregar dados iniciais das páginas
     loadPageContent();
 });
 
-// Função principal para buscar dados do tempo (sobrescrevendo a anterior)
+// Função principal para buscar dados do tempo
 async function searchWeather() {
+    const now = Date.now();
+
+    if (now - lastSearchTime < SEARCH_DELAY) {
+        showError('⏳ Aguarde antes de fazer outra busca.');
+        return;
+    }
+
     const city = cityInput?.value.trim();
-    
     if (!city) {
         showError('Por favor, digite o nome de uma cidade.');
         return;
     }
 
-    // Validar API Key antes de fazer a requisição
-    if (!validateApiKey()) {
+    if (!validateApiKey()) return;
+
+    if (city.toLowerCase() === lastCity.toLowerCase()) {
+        showError('⚠️ Você já buscou essa cidade recentemente.');
         return;
     }
+
+    lastCity = city;
+    lastSearchTime = now;
 
     showLoading();
     hideError();
@@ -60,7 +71,6 @@ async function searchWeather() {
 
     try {
         const weatherData = await fetchWeatherData(city);
-        
         if (weatherData) {
             displayWeatherData(weatherData);
             addToHistory(weatherData);
@@ -74,51 +84,40 @@ async function searchWeather() {
     }
 }
 
-// Função para buscar dados reais da API WeatherStack
+// Função para buscar dados da API com cache
 async function fetchWeatherData(city) {
-    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-        throw new Error('Por favor, configure sua chave da API no arquivo main.js');
+    if (weatherCache[city]) {
+        return weatherCache[city];
     }
 
     try {
         const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${encodeURIComponent(city)}&units=m`);
         
-        if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
         
         const data = await response.json();
         
-        // Verificar se há erro na resposta da API
-        if (data.error) {
-            throw new Error(data.error.info || 'Erro desconhecido da API');
-        }
-        
-        // Verificar se os dados necessários estão presentes
-        if (!data.current || !data.location) {
-            throw new Error('Dados incompletos recebidos da API');
-        }
-        
+        if (data.error) throw new Error(data.error.info || 'Erro desconhecido da API');
+        if (!data.current || !data.location) throw new Error('Dados incompletos recebidos da API');
+
+        weatherCache[city] = data;
         return data;
-        
+
     } catch (error) {
         console.error('Erro ao buscar dados da API:', error);
-        
-        // Se for erro de rede ou API indisponível, mostrar mensagem específica
+
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             throw new Error('Erro de conexão. Verifique sua internet e tente novamente.');
         }
-        
-        // Se for erro da API key
+
         if (error.message.includes('API key') || error.message.includes('access_key')) {
             throw new Error('Chave da API inválida. Verifique sua configuração.');
         }
-        
-        // Se a cidade não foi encontrada
+
         if (error.message.includes('location') || error.message.includes('query')) {
             throw new Error('Cidade não encontrada. Tente outro nome.');
         }
-        
+
         throw error;
     }
 }
@@ -139,7 +138,6 @@ function displayWeatherData(data) {
     const pressure = document.getElementById('pressure');
     const visibility = document.getElementById('visibility');
 
-    // Usar dados reais da API
     if (cityName) cityName.textContent = `${data.location.name}, ${data.location.country}`;
     if (currentTime) currentTime.textContent = `Atualizado: ${data.location.localtime}`;
     if (weatherIcon && data.current.weather_icons && data.current.weather_icons.length > 0) {
@@ -158,7 +156,7 @@ function displayWeatherData(data) {
     showWeatherCard();
 }
 
-// Adicionar aos favoritos (POST simulation)
+// Adicionar aos favoritos
 function addToFavorites() {
     if (!currentWeatherData) return;
 
@@ -172,7 +170,6 @@ function addToFavorites() {
         addedAt: new Date().toLocaleString('pt-BR')
     };
 
-    // Simular POST request
     const existingIndex = favorites.findIndex(fav => 
         fav.city.toLowerCase() === favoriteData.city.toLowerCase()
     );
@@ -180,21 +177,17 @@ function addToFavorites() {
     if (existingIndex === -1) {
         favorites.push(favoriteData);
         alert('Cidade adicionada aos favoritos!');
-        
-        // Atualizar página de favoritos se estiver carregada
         displayFavorites();
     } else {
         alert('Esta cidade já está nos seus favoritos!');
     }
 }
 
-// Remover dos favoritos (DELETE simulation)
 function removeFromFavorites(id) {
     favorites = favorites.filter(fav => fav.id !== id);
     displayFavorites();
 }
 
-// Adicionar ao histórico
 function addToHistory(data) {
     const historyItem = {
         id: Date.now(),
@@ -205,16 +198,12 @@ function addToHistory(data) {
         searchedAt: new Date().toLocaleString('pt-BR')
     };
 
-    // Manter apenas os últimos 10 itens
     searchHistory.unshift(historyItem);
-    if (searchHistory.length > 10) {
-        searchHistory = searchHistory.slice(0, 10);
-    }
+    if (searchHistory.length > 10) searchHistory = searchHistory.slice(0, 10);
 
     displayHistory();
 }
 
-// Exibir favoritos (para favorites.html)
 function displayFavorites() {
     const favoritesList = document.getElementById('favoritesList');
     if (!favoritesList) return;
@@ -237,7 +226,6 @@ function displayFavorites() {
     `).join('');
 }
 
-// Exibir histórico (para history.html)
 function displayHistory() {
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
@@ -259,7 +247,6 @@ function displayHistory() {
     `).join('');
 }
 
-// Carregar conteúdo específico da página
 function loadPageContent() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     
@@ -271,78 +258,21 @@ function loadPageContent() {
             displayHistory();
             break;
         default:
-            // Página inicial - nada específico a carregar
             break;
     }
 }
 
-// Funções de utilidade para mostrar/esconder elementos
-function showLoading() {
-    if (loading) loading.classList.remove('hidden');
-}
+function showLoading() { if (loading) loading.classList.remove('hidden'); }
+function hideLoading() { if (loading) loading.classList.add('hidden'); }
+function showError(message) { if (error) { error.textContent = message; error.classList.remove('hidden'); } }
+function hideError() { if (error) error.classList.add('hidden'); }
+function showWeatherCard() { if (weatherCard) weatherCard.classList.remove('hidden'); }
+function hideWeatherCard() { if (weatherCard) weatherCard.classList.add('hidden'); }
 
-function hideLoading() {
-    if (loading) loading.classList.add('hidden');
-}
-
-function showError(message) {
-    if (error) {
-        error.textContent = message;
-        error.classList.remove('hidden');
-    }
-}
-
-function hideError() {
-    if (error) error.classList.add('hidden');
-}
-
-function showWeatherCard() {
-    if (weatherCard) weatherCard.classList.remove('hidden');
-}
-
-function hideWeatherCard() {
-    if (weatherCard) weatherCard.classList.add('hidden');
-}
-
-// Função para validar se a API Key está configurada
 function validateApiKey() {
     if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
         showError('⚠️ Para usar dados reais, configure sua chave da API WeatherStack no arquivo main.js');
         return false;
     }
     return true;
-}
-
-// Adicionar validação na função de busca
-async function searchWeather() {
-    const city = cityInput?.value.trim();
-    
-    if (!city) {
-        showError('Por favor, digite o nome de uma cidade.');
-        return;
-    }
-
-    // Validar API Key antes de fazer a requisição
-    if (!validateApiKey()) {
-        return;
-    }
-
-    showLoading();
-    hideError();
-    hideWeatherCard();
-
-    try {
-        const weatherData = await fetchWeatherData(city);
-        
-        if (weatherData) {
-            displayWeatherData(weatherData);
-            addToHistory(weatherData);
-            currentWeatherData = weatherData;
-        }
-    } catch (err) {
-        showError(err.message || 'Erro ao buscar dados meteorológicos. Tente novamente.');
-        console.error('Erro na API:', err);
-    } finally {
-        hideLoading();
-    }
 }
