@@ -1,8 +1,8 @@
 // js/main.js
 
 // Configuração da API WeatherStack
-const API_KEY = 'YOUR_API_KEY_HERE'; // Substitua pela sua chave da API
-const BASE_URL = 'http://api.weatherstack.com/current';
+const API_KEY = '99a15dbcafb7db271f431e7751086382'; // Substitua pela sua chave da API
+const BASE_URL = 'https://api.weatherstack.com/current';
 
 // Simulação de armazenamento local (como não podemos usar localStorage)
 let favorites = [];
