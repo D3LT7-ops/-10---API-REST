@@ -3,6 +3,7 @@ Weather App - Consulta Meteorológica
 Desenvolvido por: Helberth Renan Gomes de Sousa
 # Descrição e Objetivo do Projeto
 O Weather App é uma aplicação web que permite aos usuários consultar informações meteorológicas em tempo real de diferentes cidades ao redor do mundo. O projeto utiliza a API WeatherStack para obter dados atualizados sobre condições climáticas, incluindo temperatura, umidade, velocidade do vento, pressão atmosférica e muito mais.
+
 ### Funcionalidades Principais:
 
 - Consulta de dados meteorológicos reais por cidade
@@ -11,15 +12,6 @@ O Weather App é uma aplicação web que permite aos usuários consultar informa
 - Histórico de pesquisas recentes
 - Interface responsiva e moderna
  
-Tecnologias Utilizadas
-
-# Weather App
-
-**Desenvolvido por:** Helberth Renan Gomes De Sousa
-
-## Descrição e Objetivo do Projeto
-
-O Weather App é uma aplicação web de consulta meteorológica que permite aos usuários buscar informações do tempo em tempo real para qualquer cidade do mundo. O projeto utiliza a **WeatherStack API** como fonte de dados meteorológicos, oferecendo informações detalhadas como temperatura atual, sensação térmica, umidade, velocidade do vento, pressão atmosférica e visibilidade.
 
 ### Funcionalidades Principais:
 - Consulta do tempo por nome da cidade
