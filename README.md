@@ -13,36 +13,63 @@ O Weather App é uma aplicação web que permite aos usuários consultar informa
  
 Tecnologias Utilizadas
 
-# Frontend:
+# Weather App
 
-HTML5
-CSS3 (com Flexbox e Grid)
-JavaScript (ES6+)
-Responsive Design
+**Desenvolvido por:** Helberth Renan Gomes De Sousa
 
+## Descrição e Objetivo do Projeto
 
-# API:
-WeatherStack API (http://weatherstack.com/)
+O Weather App é uma aplicação web de consulta meteorológica que permite aos usuários buscar informações do tempo em tempo real para qualquer cidade do mundo. O projeto utiliza a **WeatherStack API** como fonte de dados meteorológicos, oferecendo informações detalhadas como temperatura atual, sensação térmica, umidade, velocidade do vento, pressão atmosférica e visibilidade.
 
+### Funcionalidades Principais:
+- Consulta do tempo por nome da cidade
+- Sistema de favoritos para cidades frequentemente consultadas
+- Histórico de pesquisas realizadas
+- Interface responsiva e intuitiva
+- Exibição de dados meteorológicos detalhados
 
-## Tabela de Requisições por Página
+## Tecnologias Utilizadas
 
-### Descrição  
-#### Buscar dados meteorológicos **reais** da cidade
-**index.html -- get -- `https://api.weatherstack.com/current?access_key={API_KEY}&query={city}&units=`**
-### Descrição  
-#### Adicionar cidade aos favoritos 
-**index.html index.html -- post -- `/favorites`**
-### Descrição  
-#### Listar cidades favoritas 
-**favorites.html -- GET--`/favorites`**    
-### Descrição  
-#### Remover cidade dos favoritos 
-**favorites.html --DELETE-- `/favorites/{id}`**
+- **HTML5** - Estruturação das páginas
+- **CSS3** - Estilização e layout responsivo
+- **JavaScript** - Lógica da aplicação e integração com API
+- **WeatherStack API** - Fonte de dados meteorológicos
+- **Font Awesome** - Ícones da interface
 
-### descriçao 
-#### exibir historico de pesquisas
-**history.html   --GET--  `/history` (simulado localmente)**
+## Requisições por Página
+
+| **Página** | **Tipo de Requisição** | **Endpoint** |
+|------------|------------------------|--------------|
+| index.html | GET | /current (WeatherStack API) |
+| favoritos.html | GET | /current (WeatherStack API) |
+| history.html | GET | Dados do localStorage |
+
+### Detalhamento das Requisições:
+
+- **index.html**: Realiza requisições GET para o endpoint `/current` da WeatherStack API para buscar dados meteorológicos da cidade pesquisada
+- **favoritos.html**: Utiliza requisições GET para atualizar informações das cidades salvas como favoritas
+- **history.html**: Recupera dados do histórico armazenados localmente no navegador
+
+## Estrutura do Projeto
+
+```
+weather-app/
+├── index.html          # Página principal de consulta
+├── favoritos.html      # Página de cidades favoritas
+├── history.html        # Página de histórico de pesquisas
+├── css/
+│   └── estilo.css      # Arquivo de estilos
+└── js/
+    └── main.js         # Lógica JavaScript da aplicação
+```
+
+## Como Usar
+
+1. Acesse a página principal (index.html)
+2. Digite o nome de uma cidade no campo de busca
+3. Clique em "Buscar" para obter as informações meteorológicas
+4. Adicione cidades aos favoritos clicando no botão correspondente
+5. Acesse o histórico para visualizar pesquisas anteriores
 
 
 
@@ -65,13 +92,16 @@ O projeto foi testado e é compatível com:
 
 ## Créditos - Fontes de Referência
 
-- **API de Dados:** [WeatherStack API](https://weatherstack.com/)
-- **Ícones Meteorológicos:** WeatherStack Icons
-- **Documentação CSS:** [MDN Web Docs](https://developer.mozilla.org/)
-- **Documentação JavaScript:** [MDN Web Docs](https://developer.mozilla.org/)
-- **Inspiração de Design:** [Dribbble](https://dribbble.com/)
-- **Gradientes CSS:** [UI Gradients](https://uigradients.com/)
-- **Fontes:** Google Fonts (Arial como fallback)
+- **WeatherStack API** - [https://weatherstack.com/](https://weatherstack.com/)
+  - Fonte principal de dados meteorológicos em tempo real
+- **Font Awesome** - [https://fontawesome.com/](https://fontawesome.com/)
+  - Biblioteca de ícones utilizada na interface
+- **MDN Web Docs** - [https://developer.mozilla.org/](https://developer.mozilla.org/)
+  - Documentação de referência para HTML, CSS e JavaScript
+- **GitHub** - [https://github.com/D3LT7-ops](https://github.com/D3LT7-ops)
+  - Repositório do desenvolvedor
+
+
 
 
 # Licença
