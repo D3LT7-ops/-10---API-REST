@@ -341,7 +341,61 @@ footer {
     text-align: center;
     padding: 1rem 0;
     margin-top: 3rem;
-}
+    }
+      .footer-dev {
+
+            text-align: center;
+
+             margin-top: 20px;
+
+        }
+
+        .footer-dev p {
+
+         font-weight: bold;
+
+         margin-bottom: 8px;
+
+    }
+
+        .footer-dev ul {
+
+        list-style: none;
+
+        padding: 0;
+
+    }
+
+        .footer-dev li {
+
+        display: inline-block;
+
+        margin: 5px 15px;
+
+        font-size: 14px;
+
+    }
+
+        .footer-dev a {
+
+        color: #fff;
+
+        font-size: 18px;
+
+        margin-left: 5px;
+
+        transition: color 0.3s ease, transform 0.2s ease;
+
+    }
+
+        .footer-dev a:hover {
+
+        color: #ccc;
+
+        transform: scale(1.1);
+
+    }
+
 
 /* Responsive */
 @media (max-width: 768px) {
