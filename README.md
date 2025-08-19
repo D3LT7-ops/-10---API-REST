@@ -66,7 +66,7 @@ weather-app/
 
 
 ## **Limitações da API Gratuita:**
-   - numero limitados de uso da api de graca = 100 buscas por mes 
+   - numero limitados de uso da API POIS ELA E UMA API GRATIS = 100 buscas por mes  
    - Plan gratuito: 1.000 requisições/mês
    - Apenas requisições GET (não POST/PUT/DELETE)
    - Por isso favoritos/histórico são simulados localmente
