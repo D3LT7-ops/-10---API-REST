@@ -84,7 +84,7 @@ O projeto foi testado e é compatível com:
 
 ## Créditos - Fontes de Referência
 
-- **WeatherStack API** - [https://weatherstack.com/](https://weatherstack.com/)
+- **-APILAYER-WeatherStack API** - [https://weatherstack.com/](https://weatherstack.com/)
   - Fonte principal de dados meteorológicos em tempo real
 - **Font Awesome** - [https://fontawesome.com/](https://fontawesome.com/)
   - Biblioteca de ícones utilizada na interface
@@ -92,6 +92,7 @@ O projeto foi testado e é compatível com:
   - Documentação de referência para HTML, CSS e JavaScript
 - **GitHub** - [https://github.com/D3LT7-ops](https://github.com/D3LT7-ops)
   - Repositório do desenvolvedor
+
 
 
 
