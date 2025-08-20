@@ -1,7 +1,7 @@
 // js/main.js - Versão com OpenWeatherMap API (SEM CORS)
 
-// Configuração da API WeatherStack
-const API_KEY = 'da3d27a38ae49485bf935291b2ab5732'; // Substitua pela sua chave real
+// 🆕 Configuração OpenWeatherMap API
+const API_KEY = 'b2763ea62beceabae5e633191903bce5'; // Sua chave do OpenWeatherMap
 const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 const ICON_URL = 'https://openweathermap.org/img/wn/';
 
