@@ -2,7 +2,8 @@
 
 // Configuração da API WeatherStack
 const API_KEY = 'da3d27a38ae49485bf935291b2ab5732'; // Substitua pela sua chave real
-const BASE_URL = 'https://api.weatherstack.com/current';
+const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+const ICON_URL = 'https://openweathermap.org/img/wn/';
 
 // Armazenamento local simulado
 let favorites = [];
@@ -89,14 +90,27 @@ async function fetchWeatherData(city) {
 
         const data = await response.json();
         
+        // Debug: Mostrar dados recebidos no console
+        console.log('Dados recebidos da API:', data);
+        
+        // Verificar se a resposta contém erro
+        if (data.cod && data.cod !== 200) {
+            throw new Error(data.message || 'Erro na resposta da API');
+        }
+        
         // Transformar dados para formato compatível com o resto do código
         const transformedData = transformOpenWeatherData(data);
         weatherCache[city] = transformedData;
         return transformedData;
 
     } catch (err) {
+        console.error('Erro detalhado:', err);
+        
         if (err.name === 'TypeError' && err.message.includes('fetch')) {
             throw new Error('Erro de conexão. Verifique sua internet.');
+        }
+        if (err.message.includes('Cannot read properties')) {
+            throw new Error('Dados da API em formato inesperado. Tente novamente.');
         }
         throw new Error(`Falha ao buscar dados: ${err.message}`);
     }
@@ -104,21 +118,26 @@ async function fetchWeatherData(city) {
 
 // 🆕 Transformar dados da OpenWeatherMap para formato compatível
 function transformOpenWeatherData(data) {
+    // Validação dos dados obrigatórios
+    if (!data || !data.name || !data.main || !data.weather || !data.weather[0]) {
+        throw new Error('Dados da API incompletos ou inválidos');
+    }
+
     return {
         location: {
-            name: data.name,
-            country: data.sys.country,
+            name: data.name || 'Desconhecido',
+            country: (data.sys && data.sys.country) || 'N/A',
             localtime: new Date().toLocaleString('pt-BR')
         },
         current: {
-            temperature: Math.round(data.main.temp),
-            weather_descriptions: [data.weather[0].description],
-            weather_icons: [`${ICON_URL}${data.weather[0].icon}@2x.png`],
-            feelslike: Math.round(data.main.feels_like),
-            humidity: data.main.humidity,
-            wind_speed: Math.round(data.wind.speed * 3.6), // m/s para km/h
-            wind_dir: getWindDirection(data.wind.deg),
-            pressure: data.main.pressure,
+            temperature: data.main.temp ? Math.round(data.main.temp) : 'N/A',
+            weather_descriptions: [data.weather[0].description || 'Não disponível'],
+            weather_icons: [`${ICON_URL}${data.weather[0].icon || '01d'}@2x.png`],
+            feelslike: data.main.feels_like ? Math.round(data.main.feels_like) : 'N/A',
+            humidity: data.main.humidity || 'N/A',
+            wind_speed: data.wind && data.wind.speed ? Math.round(data.wind.speed * 3.6) : 'N/A',
+            wind_dir: data.wind ? getWindDirection(data.wind.deg) : 'N/A',
+            pressure: data.main.pressure || 'N/A',
             visibility: data.visibility ? Math.round(data.visibility / 1000) : 'N/A'
         }
     };
