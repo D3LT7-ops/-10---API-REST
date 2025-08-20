@@ -1,8 +1,8 @@
-// js/main.js
+// js/main.js - Versão com OpenWeatherMap API (SEM CORS)
 
 // Configuração da API WeatherStack
-const API_KEY = 'e5379773a512158d4fab1bfa05b86c41'; // Substitua pela sua chave real
-const BASE_URL = 'http://api.weatherstack.com/current';
+const API_KEY = 'da3d27a38ae49485bf935291b2ab5732'; // Substitua pela sua chave real
+const BASE_URL = 'https://api.weatherstack.com/current';
 
 // Armazenamento local simulado
 let favorites = [];
@@ -48,7 +48,7 @@ async function searchWeather() {
 
     if (!validateApiKey()) return;
 
-    if (city.toLowerCase() === lastCity.toLowerCase()) return; // Bloqueia busca repetida
+    if (city.toLowerCase() === lastCity.toLowerCase()) return;
     lastCity = city;
 
     showLoading();
@@ -68,25 +68,70 @@ async function searchWeather() {
     }
 }
 
-// Buscar dados da API com cache
+// 🆕 Buscar dados da OpenWeatherMap API
 async function fetchWeatherData(city) {
     if (weatherCache[city]) return weatherCache[city];
 
     try {
-        const response = await fetch(`${BASE_URL}?access_key=${API_KEY}&query=${encodeURIComponent(city)}&units=m`);
-        if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+        const response = await fetch(
+            `${BASE_URL}?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=pt_br`
+        );
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Cidade não encontrada. Verifique o nome e tente novamente.');
+            }
+            if (response.status === 401) {
+                throw new Error('Chave da API inválida. Verifique sua configuração.');
+            }
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
 
         const data = await response.json();
-        if (data.error) throw new Error(data.error.info);
+        
+        // Transformar dados para formato compatível com o resto do código
+        const transformedData = transformOpenWeatherData(data);
+        weatherCache[city] = transformedData;
+        return transformedData;
 
-        weatherCache[city] = data; // Armazena no cache
-        return data;
     } catch (err) {
-        throw new Error(`Falha ao buscar dados da API: ${err.message}`);
+        if (err.name === 'TypeError' && err.message.includes('fetch')) {
+            throw new Error('Erro de conexão. Verifique sua internet.');
+        }
+        throw new Error(`Falha ao buscar dados: ${err.message}`);
     }
 }
 
-// Exibir dados do tempo
+// 🆕 Transformar dados da OpenWeatherMap para formato compatível
+function transformOpenWeatherData(data) {
+    return {
+        location: {
+            name: data.name,
+            country: data.sys.country,
+            localtime: new Date().toLocaleString('pt-BR')
+        },
+        current: {
+            temperature: Math.round(data.main.temp),
+            weather_descriptions: [data.weather[0].description],
+            weather_icons: [`${ICON_URL}${data.weather[0].icon}@2x.png`],
+            feelslike: Math.round(data.main.feels_like),
+            humidity: data.main.humidity,
+            wind_speed: Math.round(data.wind.speed * 3.6), // m/s para km/h
+            wind_dir: getWindDirection(data.wind.deg),
+            pressure: data.main.pressure,
+            visibility: data.visibility ? Math.round(data.visibility / 1000) : 'N/A'
+        }
+    };
+}
+
+// 🆕 Converter graus para direção do vento
+function getWindDirection(deg) {
+    if (!deg) return 'N/A';
+    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+    return directions[Math.round(deg / 22.5) % 16];
+}
+
+// Exibir dados do tempo (mesma função, compatível)
 function displayWeatherData(data) {
     if (!weatherCard) return;
 
@@ -109,7 +154,11 @@ function displayWeatherData(data) {
         weatherIcon.alt = data.current.weather_descriptions[0] || 'Ícone do tempo';
     }
     if (temperature) temperature.textContent = data.current.temperature || 'N/A';
-    if (description) description.textContent = data.current.weather_descriptions[0] || 'Não disponível';
+    if (description) {
+        // Capitalizar primeira letra
+        const desc = data.current.weather_descriptions[0] || 'Não disponível';
+        description.textContent = desc.charAt(0).toUpperCase() + desc.slice(1);
+    }
     if (feelsLike) feelsLike.textContent = data.current.feelslike || 'N/A';
     if (humidity) humidity.textContent = data.current.humidity || 'N/A';
     if (windSpeed) windSpeed.textContent = data.current.wind_speed || 'N/A';
@@ -120,7 +169,7 @@ function displayWeatherData(data) {
     showWeatherCard();
 }
 
-// Favoritos
+// Favoritos (mesma lógica)
 function addToFavorites() {
     if (!currentWeatherData) return;
 
@@ -131,15 +180,15 @@ function addToFavorites() {
         temperature: currentWeatherData.current.temperature,
         description: currentWeatherData.current.weather_descriptions[0],
         icon: currentWeatherData.current.weather_icons[0],
-        addedAt: new Date().toLocaleString()
+        addedAt: new Date().toLocaleString('pt-BR')
     };
 
     if (!favorites.find(fav => fav.city.toLowerCase() === favoriteData.city.toLowerCase())) {
         favorites.push(favoriteData);
-        alert('Cidade adicionada aos favoritos!');
+        alert('✅ Cidade adicionada aos favoritos!');
         displayFavorites();
     } else {
-        alert('Esta cidade já está nos seus favoritos!');
+        alert('⚠️ Esta cidade já está nos seus favoritos!');
     }
 }
 
@@ -148,7 +197,7 @@ function removeFromFavorites(id) {
     displayFavorites();
 }
 
-// Histórico
+// Histórico (mesma lógica)
 function addToHistory(data) {
     const historyItem = {
         id: Date.now(),
@@ -156,7 +205,7 @@ function addToHistory(data) {
         country: data.location.country,
         temperature: data.current.temperature,
         description: data.current.weather_descriptions[0],
-        searchedAt: new Date().toLocaleString()
+        searchedAt: new Date().toLocaleString('pt-BR')
     };
 
     searchHistory.unshift(historyItem);
@@ -164,7 +213,7 @@ function addToHistory(data) {
     displayHistory();
 }
 
-// Exibir favoritos e histórico
+// Exibir favoritos e histórico (mesmas funções)
 function displayFavorites() {
     const favoritesList = document.getElementById('favoritesList');
     if (!favoritesList) return;
@@ -222,9 +271,12 @@ function showError(msg) { if (error) { error.textContent = msg; error.classList.
 function hideError() { if (error) error.classList.add('hidden'); }
 function showWeatherCard() { if (weatherCard) weatherCard.classList.remove('hidden'); }
 function hideWeatherCard() { if (weatherCard) weatherCard.classList.add('hidden'); }
+
+// 🆕 Validação da API Key atualizada
 function validateApiKey() {
-    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
-        showError('⚠️ Configure sua chave da API WeatherStack no main.js para dados reais');
+    if (!API_KEY || API_KEY === 'SUA_CHAVE_AQUI') {
+        showError('⚠️ Configure sua chave da OpenWeatherMap API no main.js');
+        console.log('📝 Como obter a chave: https://openweathermap.org/api');
         return false;
     }
     return true;
