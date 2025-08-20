@@ -1,20 +1,26 @@
-// js/main.js - Versão com OpenWeatherMap API (SEM CORS)
+// js/main.js - Projeto Completo: Clima + Blog (Todas as funcionalidades)
 
-// 🆕 Configuração WeatherAPI (Gratuita e confiável)
-const API_KEY = ''; // Não precisa de chave para teste
-const BASE_URL = 'https://wttr.in';
-const BACKUP_URL = 'https://api.openweathermap.org/data/2.5/weather';
+// 🌤️ Configuração da API de Clima
+const WEATHER_API_KEY = ''; 
+const WEATHER_BASE_URL = 'https://wttr.in';
+const WEATHER_BACKUP_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
-// Armazenamento local simulado
+// 📝 Configuração da API JSONPlaceholder (Blog)
+const BLOG_API_BASE = 'https://jsonplaceholder.typicode.com';
+
+// Armazenamento local
 let favorites = [];
 let searchHistory = [];
 let weatherCache = {};
+let posts = [];
+let users = [];
+let currentPost = null;
 
-// Debounce
+// Debounce para clima
 let debounceTimeout;
 const DEBOUNCE_DELAY = 1500;
 
-// Elementos DOM
+// Elementos DOM - Clima
 const cityInput = document.getElementById('cityInput');
 const searchBtn = document.getElementById('searchBtn');
 const loading = document.getElementById('loading');
@@ -22,32 +28,87 @@ const error = document.getElementById('error');
 const weatherCard = document.getElementById('weatherCard');
 const addFavoriteBtn = document.getElementById('addFavoriteBtn');
 
+// Elementos DOM - Blog
+const postsContainer = document.getElementById('postsContainer');
+const usersContainer = document.getElementById('usersContainer');
+const postForm = document.getElementById('postForm');
+const editForm = document.getElementById('editForm');
+
 let currentWeatherData = null;
 let lastCity = '';
 
-// Event listeners
+// 🚀 INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', () => {
-    if (searchBtn) searchBtn.addEventListener('click', searchWeatherDebounced);
-    if (cityInput) cityInput.addEventListener('input', searchWeatherDebounced);
-    if (addFavoriteBtn) addFavoriteBtn.addEventListener('click', addToFavorites);
+    setupEventListeners();
     loadPageContent();
 });
 
-// Função debounce
+function setupEventListeners() {
+    // Event listeners - Clima
+    if (searchBtn) searchBtn.addEventListener('click', searchWeatherDebounced);
+    if (cityInput) cityInput.addEventListener('input', searchWeatherDebounced);
+    if (addFavoriteBtn) addFavoriteBtn.addEventListener('click', addToFavorites);
+    
+    // Event listeners - Blog
+    if (postForm) setupCreateForm();
+    if (editForm) setupEditForm();
+    
+    // Busca em posts
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            filterPosts(e.target.value);
+        });
+    }
+}
+
+// 📄 CARREGAR CONTEÚDO BASEADO NA PÁGINA
+function loadPageContent() {
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    switch(currentPage) {
+        case 'index.html':
+        case '':
+            // Página principal - Clima
+            break;
+        case 'favorites.html':
+            displayFavorites();
+            break;
+        case 'history.html':
+            displayHistory();
+            break;
+        case 'blog.html':
+            loadPosts();
+            break;
+        case 'create.html':
+            setupCreateForm();
+            break;
+        case 'edit.html':
+            setupEditForm();
+            break;
+        case 'users.html':
+            loadUsers();
+            break;
+    }
+}
+
+// ==========================================
+// 🌤️ SEÇÃO: FUNCIONALIDADES DE CLIMA
+// ==========================================
+
+// Função debounce para clima
 function searchWeatherDebounced() {
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(() => searchWeather(), DEBOUNCE_DELAY);
 }
 
-// Função principal de busca
+// Função principal de busca do clima
 async function searchWeather() {
     const city = cityInput?.value.trim();
     if (!city) {
         showError('Por favor, digite o nome de uma cidade.');
         return;
     }
-
-    if (!validateApiKey()) return;
 
     if (city.toLowerCase() === lastCity.toLowerCase()) return;
     lastCity = city;
@@ -69,17 +130,17 @@ async function searchWeather() {
     }
 }
 
-// 🆕 Buscar dados da API sem chave (wttr.in + OpenWeather como backup)
+// Buscar dados de clima
 async function fetchWeatherData(city) {
     if (weatherCache[city]) return weatherCache[city];
 
     try {
         // Tentativa 1: API simples sem chave
-        const response = await fetch(`${BASE_URL}/${encodeURIComponent(city)}?format=j1`);
+        const response = await fetch(`${WEATHER_BASE_URL}/${encodeURIComponent(city)}?format=j1`);
         
         if (response.ok) {
             const data = await response.json();
-            console.log('Dados recebidos da wttr.in:', data);
+            console.log('Dados do clima recebidos:', data);
             
             const transformedData = transformWttrData(data, city);
             weatherCache[city] = transformedData;
@@ -89,30 +150,12 @@ async function fetchWeatherData(city) {
         throw new Error('API principal falhou');
         
     } catch (err) {
-        console.log('Tentando API alternativa...');
-        
-        try {
-            // Backup: OpenWeather com chave demo
-            const backupResponse = await fetch(
-                `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=demo&units=metric`
-            );
-            
-            if (backupResponse.ok) {
-                const backupData = await backupResponse.json();
-                const transformedData = transformOpenWeatherData(backupData);
-                weatherCache[city] = transformedData;
-                return transformedData;
-            }
-        } catch (backupErr) {
-            console.log('Backup também falhou');
-        }
-        
-        // Se tudo falhar, cria dados fictícios para demonstração
+        console.log('Criando dados de demonstração...');
         return createDemoWeatherData(city);
     }
 }
 
-// 🆕 Transformar dados da wttr.in
+// Transformar dados de clima
 function transformWttrData(data, cityName) {
     const current = data.current_condition[0];
     const area = data.nearest_area[0];
@@ -126,7 +169,7 @@ function transformWttrData(data, cityName) {
         current: {
             temperature: Math.round(current.temp_C) || 'N/A',
             weather_descriptions: [current.lang_pt ? current.lang_pt[0].value : current.weatherDesc[0].value],
-            weather_icons: [`https://cdn.weatherapi.com/weather/64x64/day/${getWeatherIcon(current.weatherCode)}.png`],
+            weather_icons: [`https://cdn.weatherapi.com/weather/64x64/day/113.png`],
             feelslike: Math.round(current.FeelsLikeC) || 'N/A',
             humidity: current.humidity || 'N/A',
             wind_speed: Math.round(current.windspeedKmph) || 'N/A',
@@ -137,26 +180,7 @@ function transformWttrData(data, cityName) {
     };
 }
 
-// Mapear códigos do tempo para ícones
-function getWeatherIcon(code) {
-    const iconMap = {
-        '113': '113', '116': '116', '119': '119', '122': '122',
-        '143': '143', '176': '176', '179': '179', '182': '182',
-        '185': '185', '200': '200', '227': '227', '230': '230',
-        '248': '248', '260': '260', '263': '263', '266': '266',
-        '281': '281', '284': '284', '293': '293', '296': '296',
-        '299': '299', '302': '302', '305': '305', '308': '308',
-        '311': '311', '314': '314', '317': '317', '320': '320',
-        '323': '323', '326': '326', '329': '329', '332': '332',
-        '335': '335', '338': '338', '350': '350', '353': '353',
-        '356': '356', '359': '359', '362': '362', '365': '365',
-        '368': '368', '371': '371', '374': '374', '377': '377',
-        '386': '386', '389': '389', '392': '392', '395': '395'
-    };
-    return iconMap[code] || '113';
-}
-
-// 🆕 Criar dados de demonstração
+// Criar dados demo de clima
 function createDemoWeatherData(city) {
     const demoData = {
         'sao paulo': { temp: 25, desc: 'Ensolarado', country: 'Brasil' },
@@ -188,14 +212,7 @@ function createDemoWeatherData(city) {
     };
 }
 
-// 🆕 Converter graus para direção do vento
-function getWindDirection(deg) {
-    if (!deg) return 'N/A';
-    const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-    return directions[Math.round(deg / 22.5) % 16];
-}
-
-// Exibir dados do tempo (mesma função, compatível)
+// Exibir dados do clima
 function displayWeatherData(data) {
     if (!weatherCard) return;
 
@@ -219,7 +236,6 @@ function displayWeatherData(data) {
     }
     if (temperature) temperature.textContent = data.current.temperature || 'N/A';
     if (description) {
-        // Capitalizar primeira letra
         const desc = data.current.weather_descriptions[0] || 'Não disponível';
         description.textContent = desc.charAt(0).toUpperCase() + desc.slice(1);
     }
@@ -233,7 +249,7 @@ function displayWeatherData(data) {
     showWeatherCard();
 }
 
-// Favoritos (mesma lógica)
+// Favoritos de clima
 function addToFavorites() {
     if (!currentWeatherData) return;
 
@@ -261,7 +277,7 @@ function removeFromFavorites(id) {
     displayFavorites();
 }
 
-// Histórico (mesma lógica)
+// Histórico de clima
 function addToHistory(data) {
     const historyItem = {
         id: Date.now(),
@@ -277,7 +293,7 @@ function addToHistory(data) {
     displayHistory();
 }
 
-// Exibir favoritos e histórico (mesmas funções)
+// Exibir favoritos
 function displayFavorites() {
     const favoritesList = document.getElementById('favoritesList');
     if (!favoritesList) return;
@@ -300,6 +316,7 @@ function displayFavorites() {
     `).join('');
 }
 
+// Exibir histórico
 function displayHistory() {
     const historyList = document.getElementById('historyList');
     if (!historyList) return;
@@ -321,23 +338,321 @@ function displayHistory() {
     `).join('');
 }
 
-// Carregar conteúdo específico da página
-function loadPageContent() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    if (currentPage === 'favorites.html') displayFavorites();
-    else if (currentPage === 'history.html') displayHistory();
+// ==========================================
+// 📝 SEÇÃO: FUNCIONALIDADES DE BLOG
+// ==========================================
+
+// 📖 GET - Buscar todos os posts
+async function loadPosts() {
+    try {
+        showLoading();
+        
+        const response = await fetch(`${BLOG_API_BASE}/posts`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        posts = await response.json();
+        
+        // Buscar usuários para relacionar com posts
+        await loadUsers();
+        
+        displayPosts(posts.slice(0, 20)); // Mostrar apenas 20 posts
+        
+    } catch (err) {
+        showError(`Erro ao carregar posts: ${err.message}`);
+    } finally {
+        hideLoading();
+    }
 }
 
-// Utilitários
-function showLoading() { if (loading) loading.classList.remove('hidden'); }
-function hideLoading() { if (loading) loading.classList.add('hidden'); }
-function showError(msg) { if (error) { error.textContent = msg; error.classList.remove('hidden'); } }
-function hideError() { if (error) error.classList.add('hidden'); }
-function showWeatherCard() { if (weatherCard) weatherCard.classList.remove('hidden'); }
-function hideWeatherCard() { if (weatherCard) weatherCard.classList.add('hidden'); }
+// 👥 GET - Buscar usuários
+async function loadUsers() {
+    try {
+        const response = await fetch(`${BLOG_API_BASE}/users`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        users = await response.json();
+        
+        // Se estamos na página de usuários, exibir
+        if (usersContainer) {
+            displayUsers(users);
+        }
+        
+    } catch (err) {
+        console.error('Erro ao carregar usuários:', err);
+    }
+}
 
-// 🆕 Validação da API Key atualizada
+// 🆕 POST - Criar novo post
+async function createPost(postData) {
+    try {
+        showLoading();
+        
+        const response = await fetch(`${BLOG_API_BASE}/posts`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(postData)
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const newPost = await response.json();
+        console.log('✅ Post criado via API:', newPost);
+        
+        alert('✅ Post criado com sucesso!');
+        
+        // Simular adição à lista local
+        posts.unshift({...newPost, id: Date.now(), userId: 1});
+        
+        return newPost;
+        
+    } catch (err) {
+        showError(`Erro ao criar post: ${err.message}`);
+        throw err;
+    } finally {
+        hideLoading();
+    }
+}
+
+// ✏️ PUT - Atualizar post
+async function updatePost(id, postData) {
+    try {
+        showLoading();
+        
+        const response = await fetch(`${BLOG_API_BASE}/posts/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(postData)
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const updatedPost = await response.json();
+        console.log('✅ Post atualizado via API:', updatedPost);
+        
+        alert('✅ Post atualizado com sucesso!');
+        
+        return updatedPost;
+        
+    } catch (err) {
+        showError(`Erro ao atualizar post: ${err.message}`);
+        throw err;
+    } finally {
+        hideLoading();
+    }
+}
+
+// 🗑️ DELETE - Deletar post
+async function deletePost(id) {
+    if (!confirm('Tem certeza que deseja deletar este post?')) return;
+    
+    try {
+        showLoading();
+        
+        const response = await fetch(`${BLOG_API_BASE}/posts/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        console.log('✅ Post deletado via API:', id);
+        alert('✅ Post deletado com sucesso!');
+        
+        // Remover da lista local
+        posts = posts.filter(post => post.id !== id);
+        displayPosts(posts.slice(0, 20));
+        
+    } catch (err) {
+        showError(`Erro ao deletar post: ${err.message}`);
+    } finally {
+        hideLoading();
+    }
+}
+
+// 📝 GET - Buscar post específico
+async function getPost(id) {
+    try {
+        const response = await fetch(`${BLOG_API_BASE}/posts/${id}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const post = await response.json();
+        return post;
+        
+    } catch (err) {
+        showError(`Erro ao carregar post: ${err.message}`);
+        throw err;
+    }
+}
+
+// 🖼️ Exibir posts na tela
+function displayPosts(postsToShow) {
+    if (!postsContainer) return;
+    
+    if (postsToShow.length === 0) {
+        postsContainer.innerHTML = '<p class="no-data">Nenhum post encontrado.</p>';
+        return;
+    }
+    
+    postsContainer.innerHTML = postsToShow.map(post => {
+        const user = users.find(u => u.id === post.userId);
+        const userName = user ? user.name : 'Usuário Desconhecido';
+        const userAvatar = user ? `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=random&size=50` : '';
+        
+        return `
+            <article class="post-card">
+                <div class="post-header">
+                    <img src="${userAvatar}" alt="Avatar ${userName}" class="user-avatar">
+                    <div class="post-meta">
+                        <h3 class="user-name">${userName}</h3>
+                        <span class="post-id">Post #${post.id}</span>
+                    </div>
+                </div>
+                <h2 class="post-title">${post.title}</h2>
+                <p class="post-body">${post.body}</p>
+                <div class="post-actions">
+                    <button onclick="editPost(${post.id})" class="btn btn-edit">✏️ Editar</button>
+                    <button onclick="deletePost(${post.id})" class="btn btn-delete">🗑️ Deletar</button>
+                </div>
+            </article>
+        `;
+    }).join('');
+}
+
+// 📄 Exibir usuários
+function displayUsers(usersToShow) {
+    if (!usersContainer) return;
+    
+    usersContainer.innerHTML = usersToShow.map(user => `
+        <div class="user-card">
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&size=80" 
+                 alt="Avatar ${user.name}" class="user-avatar-large">
+            <h3>${user.name}</h3>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Website:</strong> <a href="http://${user.website}" target="_blank">${user.website}</a></p>
+            <p><strong>Empresa:</strong> ${user.company.name}</p>
+            <p><strong>Cidade:</strong> ${user.address.city}</p>
+        </div>
+    `).join('');
+}
+
+// 📝 Configurar formulário de criação
+function setupCreateForm() {
+    if (!postForm) return;
+    
+    postForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(postForm);
+        const postData = {
+            title: formData.get('title'),
+            body: formData.get('body'),
+            userId: parseInt(formData.get('userId')) || 1
+        };
+        
+        try {
+            await createPost(postData);
+            postForm.reset();
+            // Redirecionar para blog após sucesso
+            setTimeout(() => window.location.href = 'blog.html', 1500);
+        } catch (err) {
+            console.error('Erro ao criar post:', err);
+        }
+    });
+}
+
+// ✏️ Configurar formulário de edição
+function setupEditForm() {
+    if (!editForm) return;
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = parseInt(urlParams.get('id'));
+    
+    if (!postId) return;
+    
+    // Carregar dados do post
+    loadPostForEdit(postId);
+    
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(editForm);
+        const postData = {
+            id: postId,
+            title: formData.get('title'),
+            body: formData.get('body'),
+            userId: parseInt(formData.get('userId')) || 1
+        };
+        
+        try {
+            await updatePost(postId, postData);
+            setTimeout(() => window.location.href = 'blog.html', 1500);
+        } catch (err) {
+            console.error('Erro ao atualizar post:', err);
+        }
+    });
+}
+
+// 📖 Carregar post para edição
+async function loadPostForEdit(id) {
+    try {
+        const post = await getPost(id);
+        
+        document.getElementById('title').value = post.title;
+        document.getElementById('body').value = post.body;
+        document.getElementById('userId').value = post.userId;
+        
+    } catch (err) {
+        showError('Erro ao carregar post para edição');
+    }
+}
+
+// Funções auxiliares do blog
+function editPost(id) {
+    window.location.href = `edit.html?id=${id}`;
+}
+
+function filterPosts(searchTerm) {
+    const filteredPosts = posts.filter(post => 
+        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.body.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    displayPosts(filteredPosts);
+}
+
+// ==========================================
+// 🔧 UTILITÁRIOS GERAIS
+// ==========================================
+
+function showLoading() { 
+    if (loading) loading.classList.remove('hidden'); 
+}
+
+function hideLoading() { 
+    if (loading) loading.classList.add('hidden'); 
+}
+
+function showError(msg) { 
+    if (error) { 
+        error.textContent = msg; 
+        error.classList.remove('hidden'); 
+    } 
+}
+
+function hideError() { 
+    if (error) error.classList.add('hidden'); 
+}
+
+function showWeatherCard() { 
+    if (weatherCard) weatherCard.classList.remove('hidden'); 
+}
+
+function hideWeatherCard() { 
+    if (weatherCard) weatherCard.classList.add('hidden'); 
+}
+
 function validateApiKey() {
-    // Sempre retorna true agora, pois usamos APIs sem chave
-    return true;
+    return true; // Sempre válido para APIs sem chave
 }
