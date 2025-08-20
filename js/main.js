@@ -2,7 +2,7 @@
 
 // Configuração da API WeatherStack
 const API_KEY = 'e5379773a512158d4fab1bfa05b86c41'; // Substitua pela sua chave real
-const BASE_URL = 'https://api.weatherstack.com/current';
+const BASE_URL = 'http://api.weatherstack.com/current';
 
 // Armazenamento local simulado
 let favorites = [];
