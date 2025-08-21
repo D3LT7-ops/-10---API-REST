@@ -4,7 +4,7 @@ Desenvolvido por: Helberth Renan Gomes de Sousa
 # Descrição e Objetivo do Projeto
 O Weather App é uma aplicação web que permite aos usuários consultar informações meteorológicas em tempo real de diferentes cidades ao redor do mundo. O projeto utiliza a API WeatherStack para obter dados atualizados sobre condições climáticas, incluindo temperatura, umidade, velocidade do vento, pressão atmosférica e muito mais.
 
-### 🎯 Funcionalidades Principais:
+###  Funcionalidades Principais:
 
 ####  **Consulta Meteorológica:**
 - Consulta de dados meteorológicos reais por cidade
@@ -12,13 +12,13 @@ O Weather App é uma aplicação web que permite aos usuários consultar informa
 - Sistema de cache para otimização
 - Debounce para evitar requisições excessivas
 
-#### 👥 **Seção Social:**
+####  **Seção Social:**
 - Testimoniais de usuários reais
 - Sistema de avaliações com estrelas
 - Avatars personalizados
 - Informações de localização dos usuários
 
-## 🛠️ Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 - **Frontend:**
   - HTML5 - Estruturação semântica
@@ -31,7 +31,7 @@ O Weather App é uma aplicação web que permite aos usuários consultar informa
   - OpenWeatherMap - Backup meteorológico
   - JSONPlaceholder - Dados de usuários e testimoniais
 
-## 🔌 APIs e Requisições
+##  APIs e Requisições
 
 ### Estrutura de Requisições por Página:
 
@@ -41,9 +41,9 @@ O Weather App é uma aplicação web que permite aos usuários consultar informa
 | favoritos.html | GET | `jsonplaceholder.typicode.com/users` | Testimoniais |
 | history.html | LOCAL | localStorage | Histórico de pesquisas |
 
-### 📊 Detalhamento das APIs:
+###  Detalhamento das APIs:
 
-#### 🌤️ **API de Clima (wttr.in):**
+####  **API de Clima (wttr.in):**
 ```javascript
 // Endpoint principal
 GET https://wttr.in/{city}?format=j1
@@ -79,7 +79,7 @@ GET https://jsonplaceholder.typicode.com/users
 }]
 ```
 
-## 📁 Estrutura do Projeto
+##  Estrutura do Projeto
 
 ```
 weather-app/
@@ -92,7 +92,7 @@ weather-app/
     └── main.js             # Lógica completa da aplicação
 ```
 
-## 🚀 Como Usar
+##  Como Usar
 
 ### 1. **Consultar Clima:**
 - Acesse a página principal
@@ -104,31 +104,25 @@ weather-app/
 - Na página de Favoritos, role para baixo
 - Veja testimoniais de usuários reais que usam o app
 
-## 🔧 Funcionalidades Técnicas
+##  Funcionalidades Técnicas
 
-### ⚡ **Performance:**
+###  **Performance:**
 - Sistema de cache para evitar requisições desnecessárias
 - Debounce de 1.5s para otimizar a experiência
 - Fallback para dados demo em caso de falha da API
 
-### 💾 **Armazenamento:**
+###  **Armazenamento:**
 - localStorage para favoritos e histórico
 - Cache em memória para sessão atual
 - Dados persistem entre sessões
 
 
-### 📱 **Dispositivos Testados:**
-- ✅ Desktop (1200px+)
-- ✅ Tablet (768px - 1199px) 
-- ✅ Mobile (até 767px)
+###  **Dispositivos Testados:**
+-  Desktop (1200px+)
+-  Tablet (768px - 1199px) 
+-  Mobile (até 767px)
 
-### 🌐 **Navegadores Suportados:**
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-## ⚠️ Limitações Conhecidas
+##  Limitações Conhecidas
 
 - **wttr.in**: API gratuita, pode ter limitações de rate limiting
 - **localStorage**: Limitado a ~5-10MB por domínio
